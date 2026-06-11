@@ -18,7 +18,7 @@ from pathlib import Path
 import fargv
 from fargv import FargvPositional
 
-from libs import segtformats as sgf
+from libs import segformats as sgf
 
 p = {
     'file_paths': FargvPositional(default=[], description="Input file (JSON)."),

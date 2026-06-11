@@ -7,16 +7,13 @@ import sys
 import json
 import re
 from pathlib import Path
-import xml.etree.ElementTree as ET
-from datetime import datetime
 from typing import Union, Any
 
 import fargv
-from fargv import FargvChoice, FargvInt, FargvFloat, FargvPositional, FargvTuple
+from fargv import FargvChoice, FargvPositional
 from jsonschema import validate
 
-from libs import seglib, segtformats as sgf
-
+from libs import seglib, segformats as sgf
 
 p = {
     'file_paths': FargvPositional(default=[]),

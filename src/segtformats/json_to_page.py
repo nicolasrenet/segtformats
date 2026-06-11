@@ -10,16 +10,15 @@ from pathlib import Path
 from datetime import datetime
 
 import fargv
-from fargv import FargvChoice, FargvInt, FargvFloat, FargvPositional, FargvTuple
+from fargv import FargvChoice, FargvPositional
 
-from libs import seglib, segtformats as sgf
+from libs import seglib, segformats as sgf
 
 p = {
     'file_paths': FargvPositional(default=[]),
     'polygon_key': 'coords',
     'output_format': FargvChoice(['xml', 'stdout']),
     'with_transcription': (True, "Extract line transcription, if it exists"),
-    'line_height_factor': (1.0, "Factor to be applied to the original line strip height."),
     'overwrite_existing': (False, "Overwrite an existing output file."),
     'comment': ('',"A text string to be added to the <Comments> elt."),
     'verbose': (False, "Verbose output."),
@@ -38,12 +37,6 @@ if __name__ == '__main__':
             if args.verbose:
                 print( json_path )
             segdict = json.load( json_if )
-            if args.line_height_factor != 1.0:
-                line_polygons = seglib.line_polygons_from_segmentation_dict( segdict, polygon_key=args.polygon_key, factor=args.line_height_factor )
-                line_dicts = sgf.line_dicts_from_segmentation_dict( segdict )
-                for polyg, line in zip( line_polygons, line_dicts ):
-                    line[args.polygon_key]=polyg
-                segdict['line_height_factor']=args.line_height_factor
             segdict['metadata'].update( {'created': str(datetime.now()), 'creator': __file__ })
             if args.comment:
                 segdict['metadata']['comments']=args.comment

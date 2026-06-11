@@ -46,7 +46,7 @@ from pathlib import Path
 import fargv
 from fargv import FargvChoice, FargvVariadic
 
-from libs import segtformats as sgf
+from libs import segformats as sgf
 
 p = {
     'file_paths': FargvVariadic([], description="Input file (JSON, Page, Alto)."),
