@@ -13,7 +13,7 @@
 ```python
 import segtformats as sgf
 
-print(sgf.anyseg_to_ascii('tests/data/btv1b84473026_f25.chocomufin.xml'))
+print(sgf.anyseg_to_ascii('tests/data/btv1b84473026_f25.chocomufin.xml', lines=1, scale_hw=.8))
 ```
 
 
