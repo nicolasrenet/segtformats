@@ -10,6 +10,9 @@
 
 ## Features
 
++ conversion between common segmentation metadata formats (Page, Alto)
++ use JSON as a bridge format, as documented in our [schema](doc/seg_schema.json).
+
 ```python
 import segtformats as sgf
 
@@ -39,7 +42,7 @@ print(sgf.anyseg_to_ascii('tests/data/btv1b84473026_f25.chocomufin.xml', lines=1
   python3 -m segtformats.anyseg_to_json --file_paths tests/data/*.xml
   ```
 
-+ `json_to_json`: Various transformation on JSON metadata, including repairs (region boundaries, line-to-region assignments).
++ `json_to_json`: Various transformations on JSON metadata, including repairs (region boundaries, line-to-region assignments).
 + `anyseg_to_ascii`: Render segmentation metadata on the terminal. Eg.
 
   ```bash

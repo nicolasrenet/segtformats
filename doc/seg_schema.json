@@ -1,0 +1,63 @@
+{ 
+  "id": "https://didip.uni-graz.at/segmentation.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Created by NPR on 2026.02.06 - use the following: 'check-jsonschema --schemafile schema.json *.lines.gt.json' for CLI validation or 'jsonschema.validate(instance=dict, schema=dict)' for in-script validation.",
+  "title": "Page Description",
+  "description": "Line segmentation metadata schema, for DiDip/VRE internal use: structure of *.lines.{pred,gt}.json files.",
+  "type": "object",
+  "required": ["metadata", "image_filename", "image_width", "image_height","regions"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "created": { "type": "string" },
+        "creator": { "type": "string" },
+        "comment": { "type": "string" } },
+      "required": ["created", "creator"] },
+    "image_filename": { "type": "string" },
+    "image_width": { "type": "integer" },
+    "image_height": { "type": "integer" },
+    "type": { "type": "string" },
+    "text_direction": { "type": "string" },
+    "lines": {"not":{}},
+    "regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "coords"],
+        "properties": {
+          "id": { "type": "string" },
+          "coords": { "type": "array" }, 
+          "regions": {"$ref": "#regions"},
+          "lines": { 
+            "type": "array",
+            "items": {
+              "type": "object", 
+              "required": ["id", "coords", "baseline"],
+              "properties": { 
+                "id": { "type": "string" }, 
+                "coords": { 
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": { "type": "integer" },
+		    "minItems": 2,
+		    "maxItems": 2 } }, 
+                "x-height": { "type": "integer" },
+                "centerline": { 
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": { "type": "integer" },
+		    "minItems": 2,
+		    "maxItems": 2 },
+		  "minItems": 2 },
+                "baseline": { 
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": { "type": "integer" },
+		    "minItems": 2,
+		    "maxItems": 2 },
+		  "minItems": 2 } } } } } } } } }
+
