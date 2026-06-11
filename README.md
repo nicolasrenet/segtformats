@@ -50,4 +50,4 @@ print(sgf.anyseg_to_ascii('tests/data/btv1b84473026_f25.chocomufin.xml', lines=1
 ## TODO:
 
 + Page → Alto: really?
-+ + `alto_to_json`: Alto → JSON conversion.
++ `alto_to_json`: Alto → JSON conversion.
