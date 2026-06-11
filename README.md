@@ -14,7 +14,7 @@
 + use JSON as a bridge format, as documented in our [schema](doc/seg_schema.json).
 
 ```python
-import segtformats as sgf
+from segtformats import segtformats as sgf
 
 print(sgf.anyseg_to_ascii('tests/data/btv1b84473026_f25.chocomufin.xml', lines=1, scale_hw=.8))
 ```
@@ -28,7 +28,6 @@ print(sgf.anyseg_to_ascii('tests/data/btv1b84473026_f25.chocomufin.xml', lines=1
   python3 -m segtformats.alto_to_page_xml tests/data/217_d9c7f_default.alto.xml
   ```
 
-+ `alto_to_json`: Alto → JSON conversion.
 + `json_to_page`: JSON → Page conversion.
 + `page_xml_to_json`: Page → JSON conversion. Eg.
 
@@ -48,4 +47,7 @@ print(sgf.anyseg_to_ascii('tests/data/btv1b84473026_f25.chocomufin.xml', lines=1
   ```bash
   python3 -m segtformats.anyseg_to_ascii --file_paths tests/data/*.xml
   ```
+## TODO:
 
++ Page → Alto: really?
++ + `alto_to_json`: Alto → JSON conversion.

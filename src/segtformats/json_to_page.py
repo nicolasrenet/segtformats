@@ -12,7 +12,7 @@ from datetime import datetime
 import fargv
 from fargv import FargvChoice, FargvPositional
 
-from libs import seglib, segformats as sgf
+from . import segtformats as sgf
 
 p = {
     'file_paths': FargvPositional(default=[]),

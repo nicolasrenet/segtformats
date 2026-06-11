@@ -13,7 +13,7 @@ import fargv
 from fargv import FargvChoice, FargvPositional
 from jsonschema import validate
 
-from libs import seglib, segformats as sgf
+from . import segtformats as sgf
 
 p = {
     'file_paths': FargvPositional(default=[]),

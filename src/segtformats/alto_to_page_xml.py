@@ -7,7 +7,7 @@ import sys
 import re
 from pathlib import Path
 
-from libs import segformats as sgf
+from . import segtformats as sgf
 
 USAGE=f"USAGE: {sys.argv[0]} <alto file>.xml [<PageXML output file]"
 

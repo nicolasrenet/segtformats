@@ -13,7 +13,7 @@ import re
 import fargv
 from fargv import FargvChoice, FargvPositional
 
-from libs import segformats as sgf
+from . import segtformats as sgf
 
 p = {
         "segfile_paths": FargvPositional(default=[], description="A JSON line segmentation file (e.g <prefix>.lines.pred.json)."),

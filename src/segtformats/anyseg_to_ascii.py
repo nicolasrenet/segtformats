@@ -46,7 +46,7 @@ from pathlib import Path
 import fargv
 from fargv import FargvChoice, FargvVariadic
 
-from libs import segformats as sgf
+from . import segtformats as sgf
 
 p = {
     'file_paths': FargvVariadic([], description="Input file (JSON, Page, Alto)."),
@@ -93,7 +93,7 @@ if __name__ == '__main__':
                 q=sys.stdin.read(1)
                 help_screen = False
                 continue
-            seg_rendition = sgf.any_to_ascii( args.file_paths[file_count], lines=lines, scale_hw=args.scale, repair=repair, text=text )
+            seg_rendition = sgf.anyseg_to_ascii( args.file_paths[file_count], lines=lines, scale_hw=args.scale, repair=repair, text=text )
             seg_rendition_width = len(seg_rendition.split('\n')[-1])
             pagination=f"{file_count+1}/{len(args.file_paths)}" + (' [repaired]' if repair else '')
             footer_content=f"File {pagination}: {Path( args.file_paths[file_count] ).name}"

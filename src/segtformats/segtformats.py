@@ -28,7 +28,7 @@ import shapely
 import jsonschema
 from unidecode import unidecode
 
-from .segformat_documents import JsonSchema, XslAltoPage, PageXmlSchema
+from .segtformat_documents import JsonSchema, XslAltoPage, PageXmlSchema
 
 SegFormat = Enum('SegFormat', [('Unknown',0),('PAGE',1), ('ALTO',2), ('JSON',3)])
 
