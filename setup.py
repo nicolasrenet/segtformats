@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import setuptools
-from setuptools import find_packages
+from setuptools import setup, find_packages
 
 
-setuptools.setup(
-        packages=find_packages()
+setup(
+    packages=find_packages('src'),
+    package_dir={"": "src"}
 )
