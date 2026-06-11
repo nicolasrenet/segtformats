@@ -28,9 +28,10 @@ Homepage = "https://github.com/Didip-eu/ddpa_lines_ng"
 
 [project.scripts]
 anyseg_to_ascii = "segtformats.anyseg_to_ascii:main"
+alto_to_json = "segtformats.alto_to_json:main"
 alto_to_page_xml = "segtformats.alto_to_page_xml:main"
 json_to_json = "segtformats.json_to_json:main"
-json_to_page = "segtformats.json_to_page:main"
+json_to_page_xml = "segtformats.json_to_page_xml:main"
 anyseg_to_json = "segtformats.anyseg_to_json:main"
 page_xml_to_json = "segtformats.page_xml_to_json:main"
 
