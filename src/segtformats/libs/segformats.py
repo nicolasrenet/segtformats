@@ -710,7 +710,7 @@ def region_dicts_from_segmentation_dict( segmentation_dict: dict ) -> list[dict]
     return regions
 
 
-def any_to_ascii( segfile: str, scale_hw=(.01,.02), lines=0, repair=False, text=False)->str:
+def anyseg_to_ascii( segfile: str, scale_hw=(.01,.02), lines=0, repair=False, text=False)->str:
     """
     ASCII-rendition of a segmentation file.
 
@@ -731,7 +731,7 @@ def any_to_ascii( segfile: str, scale_hw=(.01,.02), lines=0, repair=False, text=
     segdict = None
     segmentation_format = get_format( segfile )
     if segmentation_format == SegFormat.Unknown:
-        print(f"{Path(__file__).name}.any_to_ascii: Could not determine input format. Abort.")
+        print(f"{Path(__file__).name}.anyseg_to_ascii: Could not determine input format. Abort.")
         return ''
     if segmentation_format == SegFormat.JSON:
         with open(segfile) as seg_if:
