@@ -1,0 +1,8 @@
+fargv
+jsonschema
+numpy
+shapely
+unidecode
+lxml
+Pillow
+

@@ -1,0 +1,40 @@
+[project]
+name = "segtformats"
+version = "0.1"
+authors = [
+  { name="Nicolas Renet", email="nprenet@gmail.com" },
+]
+description = "Segmentation data formats: conversion tools"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+license="MIT"
+license-files=["LICENSE"]
+
+dependencies = [ 
+	"numpy",
+	"pillow",
+	"unidecode",
+	"shapely",
+	"jsonschema",
+	"fargv"  ]
+
+[project.urls]
+Homepage = "https://github.com/Didip-eu/ddpa_lines_ng"
+
+[project.scripts]
+anyseg_to_ascii = "segtformats.anyseg_to_ascii:main"
+alto_to_page_xml = "segtformats.alto_to_page_xml:main"
+json_to_json = "segtformats.json_to_json:main"
+json_to_page = "segtformats.json_to_page:main"
+anyseg_to_json = "segtformats.anyseg_to_json:main"
+page_xml_to_json = "segtformats.page_xml_to_json:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
