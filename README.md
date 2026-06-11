@@ -1,4 +1,4 @@
-# SegtFormats: A Toolbox for Manipulating Segmentation Metadata
+# Handling segmentation metadata: a toolbox
 
 
 ## Installation
