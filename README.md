@@ -16,7 +16,7 @@
 + validation options
 + ASCII-rendition of a page segmentation
 
-![]('doc/formats_diagram.pdf')
+![](doc/formats_diagram.pdf)
 
 ## SegtFormats library: examples
 
