@@ -10,12 +10,29 @@
 
 ## Features
 
-+ conversion between common segmentation metadata formats (Page, Alto)
-+ use JSON as a bridge format, as documented in our [schema](doc/seg_schema.json).
++ conversion between common segmentation metadata formats (Page, Alto).
++ use [PageXML]("http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15") as a bridge format.
++ custom JSON representation documented in our [schema](doc/seg_schema.json): the dictionary allows for manipulating the structure (flattening, region and/or line extraction) or semantic transformations (line-to-region assignments, boundaries).
++ validation options
++ ASCII-rendition of a page segmentation
+
+![]('doc/formats_diagram.pdf')
+
+## SegtFormats library: examples
 
 ```python
 from segtformats import segtformats as sgf
 
+
+# Alto to PageXML file
+sgf.alto_to_page_xml('tests/data/217_d9c7f_default.alto.xml', output_file='217_d9c7f_default.alto.page.xml')
+
+# Alto to JSON dictionary
+segmentation_dict = sgf.alto_to_segmentation_dict('tests/data/217_d9c7f_default.alto.xml')
+# validation
+assert sgf.json_validate( segmentation_dict )
+
+# ASCII rendition
 print(sgf.anyseg_to_ascii('tests/data/btv1b84473026_f25.chocomufin.xml', lines=1, scale_hw=.8))
 ```
 

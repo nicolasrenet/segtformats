@@ -75,7 +75,7 @@ def get_format( segfile: str )->int:
                 return SegFormat.Unknown
 
 
-def page_xml_from_segmentation_dict(seg_dict: str, pagexml_filename: str='', polygon_key='coords', with_text=False):
+def page_xml_from_segmentation_dict(seg_dict: str, output_file: str='', polygon_key='coords', with_text=False):
     """Serialize a JSON dictionary describing the lines into a PageXML file.
     Caution: this is a crude function, with no regard for validation.
 
@@ -85,7 +85,7 @@ def page_xml_from_segmentation_dict(seg_dict: str, pagexml_filename: str='', pol
             {"text_direction": ..., "type": "baselines", "lines": [{"tags": ..., "baseline": [ ... ]}]}
             or
             {"text_direction": ..., "type": "baselines", "regions": [ {"id": "r0", "lines": [{"tags": ..., "baseline": [ ... ]}]}, ... ]}
-        pagexml_filename (str): if provided, output is saved in a PageXML file (standard output is the default).
+        output_file (str): if provided, output is saved in a PageXML file (standard output is the default).
         polygon_key (str): if the segmentation dictionary contain alternative polygons (f.i. 'extBoundary'),
             use them, instead of the usual line 'coords'.
         with_text (bool): encode line transcription, if it exists. Default is False.
@@ -140,8 +140,8 @@ def page_xml_from_segmentation_dict(seg_dict: str, pagexml_filename: str='', pol
 
     tree = ET.ElementTree( rootElt )
     ET.indent(tree, space='\t', level=0)
-    if pagexml_filename:
-        tree.write( pagexml_filename, encoding='utf-8' )
+    if output_file:
+        tree.write( output_file, encoding='utf-8' )
     else:
         tree.write( sys.stdout, encoding='unicode' )
 
@@ -429,19 +429,19 @@ def alto_to_page_xml_string( segfile: str, xslfile=None)->str:
     LET.indent( newdom, space='\t', level=0)
     return LET.tostring( newdom ).decode()
 
-def alto_to_page_xml( segfile: str, xslfile=None, pagexml_filename: str='', overwrite_existing=True):
+def alto_to_page_xml( segfile: str, xslfile=None, output_file: str='', overwrite_existing=True):
     """
     ALTO → Page conversion tool with embedded XSL stylesheet.
 
     Args:
         segfile (str): segmentation data (ALTO format)
         xslfile (str): XSL stylesheet (optional: use built-in stylesheet as a fallback).
-1G      pagexml_filename (str): if provided, output is saved in a PageXML file (standard output is the default).
+        output_file (str): if provided, output is saved in a PageXML file (standard output is the default).
     """
 
     xml_str = alto_to_page_xml_string( segfile, xslfile=xslfile )
-    if pagexml_filename and (not Path(pagexml_filename).exists() or overwrite_existing):
-        with open( pagexml_filename, 'w') as pagexml_of:
+    if output_file and (not Path(output_file).exists() or overwrite_existing):
+        with open( output_file, 'w') as pagexml_of:
             pagexml_of.write('<?xml version="1.0" encoding="utf-8"?>\n')
             pagexml_of.write( xml_str )
     else:
