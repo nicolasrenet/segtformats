@@ -23,7 +23,6 @@
 ```python
 from segtformats import segtformats as sgf
 
-
 # Alto to PageXML file
 sgf.alto_to_page_xml('tests/data/217_d9c7f_default.alto.xml', output_file='217_d9c7f_default.alto.page.xml')
 
@@ -70,11 +69,19 @@ print(sgf.anyseg_to_ascii('tests/data/btv1b84473026_f25.chocomufin.xml', lines=1
   ```
 
 + `json_to_json`: Various transformations on JSON metadata, including repairs (region boundaries, line-to-region assignments).
+
 + `anyseg_to_ascii`: Render segmentation metadata on the terminal. Eg.
 
   ```bash
   python3 -m segtformats.anyseg_to_ascii --file_paths tests/data/*.xml
   ```
+
+Get the help on any `<command>` with
+
+```bash
+python3 -m segtformats.<command> -h
+```
+
 
 ## TODO:
 
