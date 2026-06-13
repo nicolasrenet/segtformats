@@ -14,7 +14,7 @@
 + use [PageXML]("http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15") as a bridge format.
 + custom JSON representation documented in our [schema](doc/seg_schema.json): the dictionary allows for manipulating the structure (flattening, region and/or line extraction) or semantic transformations (line-to-region assignments, boundaries).
 + validation options
-+ ASCII-rendition of a page segmentation
++ for simplicity's sake, no GUI capabilities or fancy visuals: however a page segmentation can be conveniently rendered in ASCII on the terminal, for diagnosis purpose.
 
 ![](doc/formats_diagram.png)
 
