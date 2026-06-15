@@ -80,7 +80,7 @@ if __name__ == '__main__':
         sys.exit()
     file_count=0
     lines = int(args.lines)
-    zoom = 1 # 0: <starting scale> * .75, 1: <starting_scale>, 2: <starting scale>*1.25 
+    zoom = 1 
     zoom_to_scale = [ args.scale * factor for factor in (.5, .75, 1.0, 1.25, 1.5) ]
     repair = args.repair
     text = args.text
