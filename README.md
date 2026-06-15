@@ -1,4 +1,4 @@
-# SegtFormat: a toolbox for minimalistic segmentation medatada.
+# SegtFormat: a toolbox for minimalistic segmentation metadata.
 
 SegtFormat allows for handling common page layout formats (PAGE, ALTO) with a focus on HTR tasks:
 
