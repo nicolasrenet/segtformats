@@ -578,7 +578,7 @@ def json_doctor( segdict: dict, operations={'region_fit': True, 'line_surgery': 
         print()
         for l,rr in changes.items():
             print(f"line {l}: [ {rr[0]} → ] {rr[1]}")
-    else:
+    elif dry_run and not verbose:
         print(' ✓')
     if verbose or dry_run:
         print("Region boundary adjustment {}...".format(dry_run_str))
