@@ -1,12 +1,13 @@
 # SegtFormats: a toolbox for minimalistic segmentation metadata.
 
-SegtFormat allows for handling common page layout formats (PAGE, ALTO) with a focus on HTR tasks:
+SegtFormat allows for handling a subset of features found in common page layout formats (PAGE, ALTO) with a focus on HTR tasks:
 
 + two types of objects only: regions (as bounding boxes) and lines (baselines and polygons)
 + conversion between common segmentation metadata formats ([Page](http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15), [ALTO](http://www.loc.gov/standards/alto/v4/alto-4-2.xsd)).
 + custom JSON representation documented in our [schema](doc/seg_schema.json): the dictionary allows for easy structural transformations (flattening, region and/or line extraction) or for semantic transformations (line-to-region assignments, boundaries).
-+ validation options (Page, JSON)
-+ for simplicity's sake, no fancy visuals: however a page segmentation can be conveniently rendered in ASCII on the terminal, for diagnosis purpose.
++ for metadata only: the image is not needed.
++ validation options (PAGE, JSON)
++ no fancy visuals: however a page segmentation can be conveniently rendered in ASCII on the terminal, for diagnosis purpose.
 
 
 ![](doc/formats_diagram.png)
