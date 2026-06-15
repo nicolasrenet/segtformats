@@ -1,4 +1,6 @@
 """
+06/2026, nprenet@gmail.com
+
 A module for:
 
 + conversions between established segmentation formats (ALTO, Page) and internal, DiDip-style JSON format
@@ -20,7 +22,7 @@ import itertools
 from io import StringIO
 from enum import Enum
 from datetime import datetime 
-from typing import Callable, Optional, Union, Mapping, Any
+from typing import Union, Any
 
 
 import numpy as np
@@ -714,7 +716,7 @@ def line_dicts_from_segmentation_dict( segmentation_dict: dict ) -> list[dict]:
 
 
 def region_dicts_from_segmentation_dict( segmentation_dict: dict ) -> list[dict]:
-    """From a segmentation dictionary, return a flat list of all (possibly nested) regions."
+    """From a segmentation dictionary, return a flat list of all (possibly nested) regions.
 
     Args:
         segmentation_dict (dict): a dictionary, typically constructed from a JSON file.
@@ -757,7 +759,6 @@ def anyseg_to_ascii( segfile: str, scale_hw=(.01,.02), lines=0, repair=False, te
     segdict = anyseg_to_dict( segfile )
     if not segdict:
         raise ValueError("Could not parse a valid segmentation dictionary. Abort.")
-
     if repair:
         segdict = json_doctor( segdict )
     return segdict_to_ascii( segdict, scale_hw=scale_hw, lines=lines, text=text)
