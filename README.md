@@ -9,14 +9,14 @@ SegtFormat allows for handling common page layout formats (PAGE, ALTO) with a fo
 + for simplicity's sake, no fancy visuals: however a page segmentation can be conveniently rendered in ASCII on the terminal, for diagnosis purpose.
 
 
+![](doc/formats_diagram.png)
+
 ## How to install
 
 
   ```bash
   pip install segtformats
   ```
-
-![](doc/formats_diagram.png)
 
 ## How to use
 
