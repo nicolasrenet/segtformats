@@ -4,7 +4,7 @@ SegtFormat allows for handling common page layout formats (PAGE, ALTO) with a fo
 
 + two types of objects only: regions (as bounding boxes) and lines (baselines and polygons)
 + conversion between common segmentation metadata formats ([Page](http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15), [ALTO](http://www.loc.gov/standards/alto/v4/alto-4-2.xsd)).
-+ custom JSON representation documented in our [schema](doc/seg_schema.json): the dictionary allows for manipulating the structure (flattening, region and/or line extraction) or for semantic transformations (line-to-region assignments, boundaries).
++ custom JSON representation documented in our [schema](doc/seg_schema.json): the dictionary allows for easy structural transformations (flattening, region and/or line extraction) or for semantic transformations (line-to-region assignments, boundaries).
 + validation options (Page, JSON)
 + for simplicity's sake, no fancy visuals: however a page segmentation can be conveniently rendered in ASCII on the terminal, for diagnosis purpose.
 
@@ -18,7 +18,9 @@ SegtFormat allows for handling common page layout formats (PAGE, ALTO) with a fo
 
 ![](doc/formats_diagram.png)
 
-## SegtFormats library: examples
+## How to use
+
+### Library functions: examples
 
 ```python
 from segtformats import segtformats as sgf
@@ -39,7 +41,7 @@ print(sgf.anyseg_to_ascii('tests/data/btv1b84473026_f25.chocomufin.xml', lines=1
 ```
 
 
-## Command-line utilities
+### Command-line utilities
 
 + `alto_to_page_xml`: Alto → Page conversion. Eg.
 
