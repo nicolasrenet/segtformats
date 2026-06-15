@@ -25,9 +25,11 @@ p = {
     'input_suffix': ('.lines.pred.json', "Input file suffix."),
     'output_suffix': ('', "Output file suffix; if empty, write on standard output"),
     'overwrite_existing': (False, "Overwrite an existing output file."),
-    'drop_transcription': (False, "Extract line transcription, if it exists."),
+    'drop_transcription': (False, "Remove line transcription, if it exists."),
     'repair': (False, "Repair a faulty dictionary: re-assign lines to their proper regions; expand regions to include every pixel of the line polygon."),
+    'diagnose': (False, "Run a diagnosis, scanning for potential issues."),
     'delete_line_features': ([], "Line items to be removed (used with caution!)"),
+    'verbose': (False, "Verbose."),
     "comment": ('',"A text string to be added to the <Comments> elt."),
 }
 
@@ -42,6 +44,11 @@ if __name__ == '__main__':
         segdict = None
         with open( json_path, 'r') as json_if:
             segdict = json.load( json_if )
+
+            if args.diagnose:
+                print("File diagnosis")
+                sgf.json_doctor( segdict, dry_run=True )
+                continue
 
             if args.repair:
                 print("Repairing file")
@@ -74,8 +81,6 @@ if __name__ == '__main__':
             del segdict['regions']
             segdict['metadata'].update( {'created': str(datetime.now()), 'creator': __file__ })
 
-            if args.line_height_factor != 1.0:
-                segdict['line_height_factor']=args.line_height_factor
             if args.comment:
                 segdict['metadata']['comments']=args.comment
             segdict['regions']=regions

@@ -509,7 +509,7 @@ def page_xml_validate( page_source: str, schema_source: str=PageXmlSchema ):
 
     return xmlschema.validate( page_root )
 
-def json_doctor( segdict: dict, operations={'region_fit': True, 'line_surgery': True}, verbose=False )->dict:
+def json_doctor( segdict: dict, operations={'region_fit': True, 'line_surgery': True}, verbose=False, dry_run=False )->dict:
     """
     Fix semantic issues in a JSON segmentation dictionary:
 
@@ -549,33 +549,49 @@ def json_doctor( segdict: dict, operations={'region_fit': True, 'line_surgery': 
         #if verbose:
         #    print(f"extended region: {[[l,t],[r,t],[r,b],[l,b]]}")
         return [[l,t],[r,t],[r,b],[l,b]]
-
+    dry_run_str = "[dry-run]" if dry_run else ''
     segdict_new = copy.deepcopy( segdict )
     # ensure that every line polygon is within image's limits
-    if verbose:
-        print("Check polygons against image limit...")
+    if verbose or dry_run:
+        print("1. Check polygons against image limit... {}".format(dry_run_str), end='')
+    image_boundary_ok = True
     for r in segdict_new['regions']:
         for l in r['lines']:
             new_coords=np.clip( l['coords'], [0,0], [segdict['image_width']-1, segdict['image_height']-1] ).tolist()
-            if verbose and new_coords != l['coords']:
-                print(f"region  {r['id']}, line {l['id']}: coords → {new_coords}")
-            l['coords']=new_coords
+            if new_coords != l['coords']:
+                if image_boundary_ok:
+                    image_boundary_ok = False
+                    if verbose or dry_run:
+                        print()
+                if verbose or dry_run:
+                    print(f"region  {r['id']}, line {l['id']} has out-of-image coordinates.")
+                    print(f"region  {r['id']}, line {l['id']}: coords → {new_coords}")
+                l['coords']=new_coords
 
-    if verbose:
-        print("Re-assign lines...")
-    segdict_butchered = segdict_reassign_lines( segdict_new, verbose=verbose )
-    if verbose and segdict_butchered != segdict_new:
-        print("Some lines were reassigned!")
-    if verbose:
-        print("Extend regions around their lines...")
+    if verbose or dry_run:
+        if image_boundary_ok:
+            print(' ✓')
+        print("2. Line-to-region assignment {}...".format(dry_run_str), end='')
+    segdict_butchered, changes = segdict_reassign_lines( segdict_new, verbose=verbose )
+    if changes and (verbose or dry_run):
+    #if verbose and segdict_butchered != segdict_new:
+        print()
+        for l,rr in changes.items():
+            print(f"line {l}: [ {rr[0]} → ] {rr[1]}")
+    else:
+        print(' ✓')
+    if verbose or dry_run:
+        print("Region boundary adjustment {}...".format(dry_run_str))
     for reg in segdict_butchered['regions']:
         inner_line_coords = [ c for l in reg['lines'] for c in l['coords']]
         if not inner_line_coords:
             continue
         new_coords = extend_box( reg['coords'], inner_line_coords )
-        if verbose and new_coords != reg['coords']:
+        if (verbose or dry_run) and new_coords != reg['coords']:
             print(f"region  {reg['id']} extended: {reg['coords']} → {new_coords}")
         reg['coords']=new_coords
+    if dry_run:
+        return segdict
     return segdict_butchered
 
 
@@ -589,8 +605,8 @@ def segdict_reassign_lines( segdict: dict, verbose=False):
         segdict (dict): a segmentation dictionary, DiDip-style, with regions a top-level element.
 
     Returns:
-        dict: a restructured dictionary.
-
+        tuple[dict,dict]: a pair with the modified segmentation dictionary and a (possibly empty) 
+            dictionary of changes of the form `{<line id>: (<old region id>, <new region id>)}`
     """
     def line_to_region_overlap(line_dict: dict, region_dict: dict):
         """ Check overlap between line's bbox and region boundaries."""
@@ -599,6 +615,9 @@ def segdict_reassign_lines( segdict: dict, verbose=False):
         return reg_bbox.intersection( inner_plg ).area / line_bbox.area
 
     region_to_bbox = [ shapely.envelope( shapely.multipoints( np.array( r['coords'] ))) for r in segdict['regions'] ]
+    # For diagnosis purpose only
+    line_to_region_init = { l['id']:r['id'] for r in segdict['regions'] for l in r['lines'] }  
+
     new_segdict = copy.deepcopy( segdict )
     for r in new_segdict['regions']:
         r['lines']=[]
@@ -634,6 +653,13 @@ def segdict_reassign_lines( segdict: dict, verbose=False):
     for l_idx, lr in enumerate( line_to_region ):
         del lines[l_idx]['bbox']
         new_segdict['regions'][ lr[0] ]['lines'].append( lines[l_idx] )
+
+    # for diagnosis purpose only
+    line_to_region_changes = {}
+    for l_idx,l_r_info_pair in enumerate(line_to_region):
+        r_id, l_id = segdict['regions'][l_r_info_pair[0]]['id'], lines[l_idx]['id']
+        if line_to_region_init[l_id] != r_id:
+            line_to_region_changes[l_id]=(line_to_region_init[l_id], r_id)
     if verbose: 
         for r in new_segdict['regions']:
             r_id, r_l, r_t, r_r, r_b = r['id'].replace('eSc_textblock_',''), *(np.array(r['coords']).min(axis=0).tolist()), *(np.array(r['coords']).max(axis=0).tolist())
@@ -642,7 +668,7 @@ def segdict_reassign_lines( segdict: dict, verbose=False):
             for  l_id, l_l, l_t, l_r, l_b in sorted( region_bboxes, key=lambda x: x[2] ):
                 print(f"\tline {l_id}: [<{l_l},{l_r}>, <{l_t},{l_b}>]")
 
-    return new_segdict
+    return (new_segdict, line_to_region_changes)
 
 
 def flatten_segmentation_dict( segmentation_dict: dict ) -> dict:
@@ -728,6 +754,24 @@ def anyseg_to_ascii( segfile: str, scale_hw=(.01,.02), lines=0, repair=False, te
     Returns:
         str: a character-based rendition of the layout.
     """
+    segdict = anyseg_to_dict( segfile )
+    if not segdict:
+        raise ValueError("Could not parse a valid segmentation dictionary. Abort.")
+
+    if repair:
+        segdict = json_doctor( segdict )
+    return segdict_to_ascii( segdict, scale_hw=scale_hw, lines=lines, text=text)
+
+def anyseg_to_dict( segfile: str )->dict:
+    """
+    Parse any segmentation file into a Python dictionary.
+
+    Args:
+        segfile (str): path of a JSON, Page, or Alto segmentation file.
+
+    Returns:
+        dict: a segmentation dictionary.
+    """
     segdict = None
     segmentation_format = get_format( segfile )
     if segmentation_format == SegFormat.Unknown:
@@ -740,13 +784,8 @@ def anyseg_to_ascii( segfile: str, scale_hw=(.01,.02), lines=0, repair=False, te
         segdict = segmentation_dict_from_page_xml( segfile )
     elif segmentation_format == SegFormat.ALTO:
         segdict = segmentation_dict_from_page_xml( alto_to_page_xml_string( segfile ))
+    return segdict
 
-    if not segdict:
-        raise ValueError("Could not parse a valid segmentation dictionary. Abort.")
-
-    if repair:
-        segdict = json_doctor( segdict )
-    return segdict_to_ascii( segdict, scale_hw=scale_hw, lines=lines, text=text)
 
 def segdict_to_ascii( segdict:dict, scale_hw=(.01,.02), lines=0, summary=True, text=False)->str:
     """

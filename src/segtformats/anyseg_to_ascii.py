@@ -53,6 +53,7 @@ p = {
     "lines": FargvChoice(['1','2','0'], description="0=lines omitted, 1=lines within region limits, 2=lines within canvas limits."),
     "scale": (1.0, "Factor to be applied to the default scale."),
     "repair": (False, "Try repairing a faulty segmentation before rendition (file is not modified)."),
+    "diagnose": (False, "Run a diagnosis, scanning for potential issues."),
     "text": (False, "Display text, if present."),
 }   
 
@@ -60,13 +61,15 @@ bold_start, bold_end = '\033[1m', '\033[0m'
 help_msg = f"""
 Key bindings: 
 
-    {bold_start}n{bold_end}: {bold_start}n{bold_end}ext file
-    {bold_start}p{bold_end}: {bold_start}p{bold_end}revious file
-    {bold_start}l{bold_end}: circle through {bold_start}l{bold_end}ine display modes (1=region, 2=canvas, 0=none)
-    {bold_start}r{bold_end}: {bold_start}r{bold_end}epair segmentation before rendering
+    {bold_start}n{bold_end}: {bold_start}n{bold_end}ext file.
+    {bold_start}p{bold_end}: {bold_start}p{bold_end}revious file.
+    {bold_start}l{bold_end}: cycle through {bold_start}l{bold_end}ine display modes (1=region, 2=canvas, 0=none).
+    {bold_start}d{bold_end}: {bold_start}d{bold_end}iagnose segmentation.
+    {bold_start}r{bold_end}: {bold_start}r{bold_end}epair segmentation before rendering.
     {bold_start}q{bold_end}: {bold_start}q{bold_end}uit application (or exit this help screen).
     {bold_start}t{bold_end}: display {bold_start}t{bold_end}ext.
-    {bold_start}h{bold_end} or {bold_start}?{bold_end}: this {bold_start}h{bold_end}elp
+    {bold_start}z{bold_end}: cycle through {bold_start}z{bold_end}oom levels.
+    {bold_start}h{bold_end} or {bold_start}?{bold_end}: this {bold_start}h{bold_end}elp.
 """
 
 if __name__ == '__main__':
@@ -77,9 +80,11 @@ if __name__ == '__main__':
         sys.exit()
     file_count=0
     lines = int(args.lines)
+    zoom = 1 # 0: <starting scale> * .75, 1: <starting_scale>, 2: <starting scale>*1.25 
+    zoom_to_scale = [ args.scale * factor for factor in (.5, .75, 1.0, 1.25, 1.5) ]
     repair = args.repair
     text = args.text
-    help_screen = False
+    help_screen, diagnosis_screen = False, False
 
     try:
         # from line-oriented term (default) → char-oriented input
@@ -88,12 +93,16 @@ if __name__ == '__main__':
 
         while True:
             print('\x1b[2J')
-            if help_screen:
-                print(help_msg)
-                q=sys.stdin.read(1)
-                help_screen = False
+            if help_screen or diagnosis_screen:
+                if diagnosis_screen:
+                    sgf.json_doctor( sgf.anyseg_to_dict( args.file_paths[file_count] ), dry_run=True )
+                else:
+                    print(help_msg)
+                _=sys.stdin.read(1)
+                help_screen, diagnosis_screen = False, False
                 continue
-            seg_rendition = sgf.anyseg_to_ascii( args.file_paths[file_count], lines=lines, scale_hw=args.scale, repair=repair, text=text )
+
+            seg_rendition = sgf.anyseg_to_ascii( args.file_paths[file_count], lines=lines, scale_hw=zoom_to_scale[zoom], repair=repair, text=text )
             seg_rendition_width = len(seg_rendition.split('\n')[-1])
             pagination=f"{file_count+1}/{len(args.file_paths)}" + (' [repaired]' if repair else '')
             footer_content=f"File {pagination}: {Path( args.file_paths[file_count] ).name}"
@@ -103,24 +112,28 @@ if __name__ == '__main__':
             print(''.join(footer) )
 
             # Key bindings
-            q=sys.stdin.read(1)
-            if q == 'q':
+            key=sys.stdin.read(1)
+            if key == 'q':
                 break
-            elif q == 'n':
+            elif key == 'n':
                 file_count= (file_count+ 1) % len(args.file_paths)
                 lines =  int(args.lines)
                 repair = args.repair
-            elif q == 'p':
+            elif key == 'p':
                 file_count= (file_count- 1) % len(args.file_paths)
                 lines = int(args.lines)
                 repair = args.repair
-            elif q == 'l':
+            elif key == 'l':
                 lines = (lines + 1) % 3
-            elif q == 'r':
+            elif key == 'z':
+                zoom = (zoom + 1) % 5
+            elif key == 'r':
                 repair = not repair
-            elif q == 't':
+            elif key == 'd':
+                diagnosis_screen = True
+            elif key == 't':
                 text = not text
-            elif q in ['h', '?']:
+            elif key in ['h', '?']:
                 help_screen = True
     finally:
         # no matter what, restore default terminal settings
