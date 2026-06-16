@@ -34,7 +34,7 @@ def main():
 
         status_string=f"{segfile_path_str}: "
 
-        segdict = sgf.anyseg_to_dict( segfile_path )
+        segdict = sgf.anyseg_to_dict( segfile_path_str )
         if not segdict:
             if args.verbose:
                 print( status_string + '____' )
