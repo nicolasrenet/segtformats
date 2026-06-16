@@ -77,7 +77,7 @@ def get_format( segfile: str )->int:
                 return SegFormat.Unknown
 
 
-def page_xml_from_segmentation_dict(seg_dict: str, output_file: str='', with_text=False):
+def page_xml_from_segmentation_dict(seg_dict: str, output_file: str='', with_text=True):
     """Serialize a JSON dictionary describing the lines into a PageXML file.
     Caution: this is a crude function, with no regard for validation.
 
