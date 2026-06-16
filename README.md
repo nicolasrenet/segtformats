@@ -19,6 +19,14 @@ SegtFormat allows for handling a subset of features found in common page layout 
   pip install segtformats
   ```
 
+or from GitHub:
+
+  ```bash
+  git clone git@github.com:nicolasrenet/segtformats.git
+  cd segtformats
+  pip install .
+  ```
+
 ## How to use
 
 ### Library functions: examples
