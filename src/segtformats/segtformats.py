@@ -14,7 +14,6 @@ A module for:
 from pathlib import Path
 import sys
 import xml.etree.ElementTree as ET
-import lxml.etree as LET
 import json
 import re
 import copy
@@ -28,6 +27,7 @@ from typing import Union, Any
 import numpy as np
 import shapely
 import jsonschema
+import lxml.etree as LET
 from unidecode import unidecode
 
 from .segtformat_documents import JsonSchema, XslAltoPage, PageXmlSchema
