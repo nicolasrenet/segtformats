@@ -99,4 +99,4 @@ python3 -m segtformats.<command> -h
 
 ## TODO:
 
-+ Page → Alto: really?
++ Page → Alto
