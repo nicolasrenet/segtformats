@@ -82,7 +82,7 @@ print(sgf.anyseg_to_ascii('tests/data/btv1b84473026_f25.chocomufin.xml', lines=1
   python3 -m segtformats.json_to_page_xml tests/data/217_d9c7f_default.json
   ```
 
-+ `json_to_json`: Various transformations on JSON metadata, including repairs (region boundaries, line-to-region assignments).
++ `json_doctor`: Various transformations on JSON metadata, including repairs (region boundaries, line-to-region assignments).
 
 + `anyseg_to_ascii`: Render segmentation metadata on the terminal. Eg.
 

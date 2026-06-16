@@ -96,9 +96,9 @@ def page_xml_from_segmentation_dict(seg_dict: str, output_file: str='', polygon_
         return ' '.join([ f"{pair[0]:.0f},{pair[1]:.0f}" for pair in list_of_pts ] )
 
     rootElt = ET.Element('PcGts', attrib={
-        "xmlns": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15", 
+        "xmlns": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15", 
         "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance", 
-        "xsi:schemaLocation": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15/pagecontent.xsd"})
+        "xsi:schemaLocation": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15/pagecontent.xsd"})
     metadataElt = ET.SubElement(rootElt, 'Metadata')
     creatorElt = ET.SubElement( metadataElt, 'Creator')
     creatorElt.text=seg_dict['metadata']['creator'] if ('metadata' in seg_dict and 'creator' in seg_dict['metadata']) else 'Universität Graz/DH/nicolas.renet@uni-graz.at'
