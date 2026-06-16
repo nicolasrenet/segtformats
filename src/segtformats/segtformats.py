@@ -73,11 +73,11 @@ def get_format( segfile: str )->int:
                     return SegFormat.JSON
                 return SegFormat.Unknown
             except ValueError:
-                print(f"{Path(__file__).name}.get_format: unknown (non-JSON) format!")
+                #print(f"{Path(__file__).name}.get_format: unknown (non-JSON) format!")
                 return SegFormat.Unknown
 
 
-def page_xml_from_segmentation_dict(seg_dict: str, output_file: str='', polygon_key='coords', with_text=False):
+def page_xml_from_segmentation_dict(seg_dict: str, output_file: str='', with_text=False):
     """Serialize a JSON dictionary describing the lines into a PageXML file.
     Caution: this is a crude function, with no regard for validation.
 
@@ -88,8 +88,6 @@ def page_xml_from_segmentation_dict(seg_dict: str, output_file: str='', polygon_
             or
             {"text_direction": ..., "type": "baselines", "regions": [ {"id": "r0", "lines": [{"tags": ..., "baseline": [ ... ]}]}, ... ]}
         output_file (str): if provided, output is saved in a PageXML file (standard output is the default).
-        polygon_key (str): if the segmentation dictionary contain alternative polygons (f.i. 'extBoundary'),
-            use them, instead of the usual line 'coords'.
         with_text (bool): encode line transcription, if it exists. Default is False.
     """
     def boundary_to_point_string( list_of_pts ):
@@ -134,7 +132,7 @@ def page_xml_from_segmentation_dict(seg_dict: str, output_file: str='', polygon_
         for line in lines:
             line_xml_id = f"l{line['id']}" if type(line['id']) is int else line['id']
             textLineElt = ET.SubElement( regElt, 'TextLine', attrib={'id': line_xml_id} )
-            ET.SubElement( textLineElt, 'Coords', attrib={'points': boundary_to_point_string(line[polygon_key])} )
+            ET.SubElement( textLineElt, 'Coords', attrib={'points': boundary_to_point_string(line['coords'])} )
             if 'baseline' in line:
                 ET.SubElement( textLineElt, 'Baseline', attrib={'points': boundary_to_point_string(line['baseline'])})
             if with_text and 'text' in line:
