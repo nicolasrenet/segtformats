@@ -15,17 +15,20 @@ from fargv import FargvChoice, FargvPositional
 
 from . import segtformats as sgf
 
-p = {
-        "segfile_paths": FargvPositional(default=[], description="A JSON line segmentation file (e.g <prefix>.lines.pred.json)."),
-        "overwrite_existing": (False, "Do not overwrite existing output file"),
-        "repair": (False, "If True, fix semantic errors in the segmentation (line-to-region assignment, region boundaries)."),
-        "validate": False,
-        "output_format": FargvChoice(['json', 'stdout'], description="Output format"),
-        "verbose": True,
-}
-args, _ = fargv.parse( p )
-
 if __name__ == '__main__':
+    main()
+
+def main():
+
+    p = {
+            "segfile_paths": FargvPositional(default=[], description="A JSON line segmentation file (e.g <prefix>.lines.pred.json)."),
+            "overwrite_existing": (False, "Do not overwrite existing output file"),
+            "repair": (False, "If True, fix semantic errors in the segmentation (line-to-region assignment, region boundaries)."),
+            "validate": False,
+            "output_format": FargvChoice(['json', 'stdout'], description="Output format"),
+            "verbose": True,
+    }
+    args, _ = fargv.parse( p )
 
     for segfile_path_str in args.segfile_paths:
 

@@ -14,18 +14,22 @@ from fargv import FargvChoice, FargvPositional
 
 from . import segtformats as sgf
 
-p = {
-    'file_paths': FargvPositional(default=[]),
-    'polygon_key': 'coords',
-    'output_format': FargvChoice(['xml', 'stdout']),
-    'with_transcription': (True, "Extract line transcription, if it exists"),
-    'overwrite_existing': (False, "Overwrite an existing output file."),
-    'comment': ('',"A text string to be added to the <Comments> elt."),
-    'verbose': (False, "Verbose output."),
-}
-
 
 if __name__ == '__main__':
+    main()
+
+
+def main():
+
+    p = {
+        'file_paths': FargvPositional(default=[]),
+        'polygon_key': 'coords',
+        'output_format': FargvChoice(['xml', 'stdout']),
+        'with_transcription': (True, "Extract line transcription, if it exists"),
+        'overwrite_existing': (False, "Overwrite an existing output file."),
+        'comment': ('',"A text string to be added to the <Comments> elt."),
+        'verbose': (False, "Verbose output."),
+    }
 
     args, _ = fargv.parse( p )
 

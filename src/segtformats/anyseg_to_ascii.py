@@ -48,31 +48,35 @@ from fargv import FargvChoice, FargvVariadic
 
 from . import segtformats as sgf
 
-p = {
-    'file_paths': FargvVariadic([], description="Input file (JSON, Page, Alto)."),
-    "lines": FargvChoice(['1','2','0'], description="0=lines omitted, 1=lines within region limits, 2=lines within canvas limits."),
-    "scale": (1.0, "Factor to be applied to the default scale."),
-    "repair": (False, "Try repairing a faulty segmentation before rendition (file is not modified)."),
-    "diagnose": (False, "Run a diagnosis, scanning for potential issues."),
-    "text": (False, "Display text, if present."),
-}   
-
-bold_start, bold_end = '\033[1m', '\033[0m'
-help_msg = f"""
-Key bindings: 
-
-    {bold_start}n{bold_end}: {bold_start}n{bold_end}ext file.
-    {bold_start}p{bold_end}: {bold_start}p{bold_end}revious file.
-    {bold_start}l{bold_end}: cycle through {bold_start}l{bold_end}ine display modes (1=region, 2=canvas, 0=none).
-    {bold_start}d{bold_end}: {bold_start}d{bold_end}iagnose segmentation.
-    {bold_start}r{bold_end}: {bold_start}r{bold_end}epair segmentation before rendering.
-    {bold_start}q{bold_end}: {bold_start}q{bold_end}uit application (or exit this help screen).
-    {bold_start}t{bold_end}: display {bold_start}t{bold_end}ext.
-    {bold_start}z{bold_end}: cycle through {bold_start}z{bold_end}oom levels.
-    {bold_start}h{bold_end} or {bold_start}?{bold_end}: this {bold_start}h{bold_end}elp.
-"""
-
 if __name__ == '__main__':
+    main()
+
+def main():
+
+    p = {
+        'file_paths': FargvVariadic([], description="Input file (JSON, Page, Alto)."),
+        "lines": FargvChoice(['1','2','0'], description="0=lines omitted, 1=lines within region limits, 2=lines within canvas limits."),
+        "scale": (1.0, "Factor to be applied to the default scale."),
+        "repair": (False, "Try repairing a faulty segmentation before rendition (file is not modified)."),
+        "diagnose": (False, "Run a diagnosis, scanning for potential issues."),
+        "text": (False, "Display text, if present."),
+    }   
+
+    bold_start, bold_end = '\033[1m', '\033[0m'
+    help_msg = f"""
+    Key bindings: 
+
+        {bold_start}n{bold_end}: {bold_start}n{bold_end}ext file.
+        {bold_start}p{bold_end}: {bold_start}p{bold_end}revious file.
+        {bold_start}l{bold_end}: cycle through {bold_start}l{bold_end}ine display modes (1=region, 2=canvas, 0=none).
+        {bold_start}d{bold_end}: {bold_start}d{bold_end}iagnose segmentation.
+        {bold_start}r{bold_end}: {bold_start}r{bold_end}epair segmentation before rendering.
+        {bold_start}q{bold_end}: {bold_start}q{bold_end}uit application (or exit this help screen).
+        {bold_start}t{bold_end}: display {bold_start}t{bold_end}ext.
+        {bold_start}z{bold_end}: cycle through {bold_start}z{bold_end}oom levels.
+        {bold_start}h{bold_end} or {bold_start}?{bold_end}: this {bold_start}h{bold_end}elp.
+    """
+
 
     args, _ = fargv.parse( p )
     if not args.file_paths:

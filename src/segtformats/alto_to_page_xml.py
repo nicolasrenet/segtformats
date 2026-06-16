@@ -12,6 +12,9 @@ from . import segtformats as sgf
 USAGE=f"USAGE: {sys.argv[0]} <alto file>.xml [<PageXML output file]"
 
 if __name__ == '__main__':
+    main()
+
+def main():
 
     if len(sys.argv) < 2 or re.match(r'--?h', sys.argv[1]):
         print(USAGE)

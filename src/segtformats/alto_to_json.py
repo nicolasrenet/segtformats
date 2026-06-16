@@ -15,19 +15,22 @@ from jsonschema import validate
 
 from . import segtformats as sgf
 
-p = {
-    'file_paths': FargvPositional(default=[]),
-    'output_format': FargvChoice(['json', 'stdout'], description="Output format"),
-    'input_suffix': '.xml',
-    'overwrite_existing': (False, "Overwrite an existing file."),
-    "comment": ('',"A text string to be added to the <Comments> elt."),
-    "verbose": False,
-    "repair": (False, "Repair a faulty dictionary (reassign lines to regions, fix region bounding boxes"),
-    "validate": (False, "Validate against a JSON schema."),
-}
-
 
 if __name__ == '__main__':
+    main()
+
+def main():
+
+    p = {
+        'file_paths': FargvPositional(default=[]),
+        'output_format': FargvChoice(['json', 'stdout'], description="Output format"),
+        'input_suffix': '.xml',
+        'overwrite_existing': (False, "Overwrite an existing file."),
+        "comment": ('',"A text string to be added to the <Comments> elt."),
+        "verbose": False,
+        "repair": (False, "Repair a faulty dictionary (reassign lines to regions, fix region bounding boxes"),
+        "validate": (False, "Validate against a JSON schema."),
+    }
 
     args, _ = fargv.parse( p )
 

@@ -20,21 +20,23 @@ from fargv import FargvPositional
 
 from . import segtformats as sgf
 
-p = {
-    'file_paths': FargvPositional(default=[], description="Input file (JSON)."),
-    'input_suffix': ('.lines.pred.json', "Input file suffix."),
-    'output_suffix': ('', "Output file suffix; if empty, write on standard output"),
-    'overwrite_existing': (False, "Overwrite an existing output file."),
-    'drop_transcription': (False, "Remove line transcription, if it exists."),
-    'repair': (False, "Repair a faulty dictionary: re-assign lines to their proper regions; expand regions to include every pixel of the line polygon."),
-    'diagnose': (False, "Run a diagnosis, scanning for potential issues."),
-    'delete_line_features': ([], "Line items to be removed (used with caution!)"),
-    'verbose': (False, "Verbose."),
-    "comment": ('',"A text string to be added to the <Comments> elt."),
-}
-
 
 if __name__ == '__main__':
+    main()
+
+def main():
+    p = {
+        'file_paths': FargvPositional(default=[], description="Input file (JSON)."),
+        'input_suffix': ('.lines.pred.json', "Input file suffix."),
+        'output_suffix': ('', "Output file suffix; if empty, write on standard output"),
+        'overwrite_existing': (False, "Overwrite an existing output file."),
+        'drop_transcription': (False, "Remove line transcription, if it exists."),
+        'repair': (False, "Repair a faulty dictionary: re-assign lines to their proper regions; expand regions to include every pixel of the line polygon."),
+        'diagnose': (False, "Run a diagnosis, scanning for potential issues."),
+        'delete_line_features': ([], "Line items to be removed (used with caution!)"),
+        'verbose': (False, "Verbose."),
+        "comment": ('',"A text string to be added to the <Comments> elt."),
+    }
 
     args, _ = fargv.parse( p )
 
