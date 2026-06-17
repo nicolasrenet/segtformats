@@ -2,6 +2,7 @@
 
 SegtFormat allows for handling a subset of features found in common page layout formats (PAGE, ALTO) with a focus on HTR tasks:
 
++ 1 image = 1 page = 1 label document[^1]
 + two types of objects only: regions (as bounding boxes) and lines (baselines and polygons)
 + conversion between common segmentation metadata formats ([Page](http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15), [ALTO](http://www.loc.gov/standards/alto/v4/alto-4-2.xsd)).
 + custom JSON representation documented in our [schema](doc/seg_schema.json): the dictionary allows for easy structural transformations (flattening, region and/or line extraction) or for semantic transformations (line-to-region assignments, boundaries).
@@ -9,6 +10,7 @@ SegtFormat allows for handling a subset of features found in common page layout 
 + validation options (PAGE, JSON)
 + no fancy visuals: however a page segmentation can be conveniently rendered in ASCII on the terminal, for diagnosis purpose.
 
+[^1]: compare with PAGE, where one document may label $n$ images (each corresponding to exactly one `Page` element), and ALTO, where one document labels exactly one image and possibly $n$ pages within it.
 
 ![](doc/formats_diagram.png)
 
