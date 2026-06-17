@@ -145,8 +145,91 @@ def page_xml_from_segmentation_dict(seg_dict: str, output_file: str='', with_tex
     else:
         tree.write( sys.stdout, encoding='unicode' )
 
+"""
+<!--
+        <xsl:value-of select="@imageHeight"/>
+        <xsl:result-document href="{$filename}">
+        <xsl:result-document href="youpi.xml" method="xml">
+        
 
-def segmentation_dict_from_page_xml(page_source: str, get_text=True, regions_as_boxes=True, strict=False, region_line_overlap=.9) -> dict[str,Union[str,list[Any]]]:
+            <PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15/pagecontent.xsd">
+                <Metadata>
+                    <Creator>Generated from PAGE file '<xsl:value-of select="$source"/>' / Universität Graz/DDH/nicolas.renet@uni-graz.at</Creator>
+                    <Created>
+                        <xsl:value-of select="$today"/>
+                    </Created>
+                    <LastChange>
+                        <xsl:value-of select="$today"/>
+                    </LastChange>
+                </Metadata>
+                <xsl:value-of select="current()"/>
+            </PcGts>
+        </xsl:result-document>
+-->
+"""
+
+def page_xml_split( source_file:str, overwrite_existing=True ):
+    """
+    From a single multi-page PAGE label (i.e. with 2+ `<Page>` elements), create one standalone label per image.
+
+    Args:
+        source_file (str): path of a PageXML file.
+        overwrite_existing (bool): if True, overwrite existing output files.
+
+    Returns:
+        list[str]: paths of files created.
+    """
+
+    # XSL transform: construct a meta-document with 
+    #dom = LET.parse(source_file)
+    #transform = LET.XSLT( LET.XML( XslPageSplit.encode() ))
+    #dom = transform(dom)
+    #print(type(dom), LET.tostring(dom))
+
+    target_dir = Path(source_file).parent
+    page_tree = None
+
+    def extract_ns_from_file( f ):
+        nonlocal page_tree
+        page_root, ns = None, {}
+        with open( f, 'r' ) as page_file:
+            for line in page_file:
+                m = re.search(r'xmlns="([^"]+)"', line)
+                if m:
+                    ns['pc'] = m.group(1)
+                    page_file.seek(0)
+                    break
+            # no namespace prefix 
+            ET.register_namespace('', ns['pc'])
+            page_tree = ET.parse( page_file )
+            page_root = page_tree.getroot()
+        return page_root, ns
+
+    # if source is an XML string
+    page_root, ns = None, {}
+    page_root, ns = extract_ns_from_file( source_file )
+    if page_root is None:
+        raise ValueError("Could not parse the source. Abort.")
+    if 'pc' not in ns:
+        raise ValueError(f"Could not find a name space in file {page_root}. Parsing aborted.")
+    
+    pageElts = page_root.findall('.//pc:Page', ns)
+    for p in pageElts:
+        page_root.remove( p )
+    created = []
+    for page_idx, pageElt in enumerate(pageElts):
+        output_filename = re.sub(r'\.[^.]+$', '.xml', pageElt.get('imageFilename').replace(' ', '_'))
+        page_root.insert(1, pageElt)
+        output_path = target_dir.joinpath( output_filename )
+        if not output_path.exists() or overwrite_existing: 
+            page_tree.write( output_path, encoding='utf-8', xml_declaration=True )
+            created.append( str(output_path) )
+            
+        page_root.remove( pageElt )
+    return created
+
+
+def segmentation_dict_from_page_xml(page_source: str, get_text=True, regions_as_boxes=True ) -> dict:
     """Given a pageXML file name, return a JSON dictionary describing the lines.
     If the input file has more than one `<Page>` element, a corre
 
@@ -158,11 +241,6 @@ def segmentation_dict_from_page_xml(page_source: str, get_text=True, regions_as_
         regions_as_boxes (bool): when regions have more than 4 points or are not rectangular,
             store their bounding boxes instead; the boxe's boundary is determined
             by its pertaining lines, not by its nominal coordinates(default: True).
-        strict (bool): if True, raise an exception if line coordinates are not comprised within
-            their region's boundaries; otherwise (default), the region value is automatically
-            extended to encompass the line coordinates.
-        region_line_overlap (float): lines that do not overlap their region by this
-            threshold are removed from the output dictionary.
 
     Returns:
         dict: a dictionary of the form::
@@ -176,7 +254,6 @@ def segmentation_dict_from_page_xml(page_source: str, get_text=True, regions_as_
            Regions are stored as a top-element.
     TODO:
         - check that unhandled exception on U-17_0995_s01.xml (AttributeError) has been fixed.
-        - assign each line its containing region_s_ as a property.
     """
     def parse_coordinates( pts ):
         return [ [ int(p) for p in pt.split(',') ] for pt in pts.split(' ') ]

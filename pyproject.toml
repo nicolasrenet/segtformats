@@ -37,6 +37,7 @@ anyseg_to_ascii = "segtformats.anyseg_to_ascii:main"
 anyseg_to_json = "segtformats.anyseg_to_json:main"
 json_doctor = "segtformats.json_doctor:main"
 anyseg_doctor = "segtformats.anyseg_doctor:main"
+page_xml_split = "segtformats.page_xml_split:main"
 
 [build-system]
 requires = ["setuptools"]

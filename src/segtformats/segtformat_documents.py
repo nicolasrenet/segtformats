@@ -151,6 +151,7 @@ XslAltoPage="""<?xml version = "1.0" encoding = "UTF-8"?>
 </xsl:stylesheet>
 """
 
+
 PageXmlSchema="""<schema targetNamespace="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15" xmlns:pc="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<element name="PcGts" type="pc:PcGtsType">
 		<annotation>
@@ -2733,4 +2734,36 @@ PageXmlSchema="""<schema targetNamespace="http://schema.primaresearch.org/PAGE/g
 	</simpleType>
 </schema>
 """
+# Un-used
+XslPageSplit="""<?xml version = "1.0" encoding = "UTF-8"?>
+<!--
+    Author: nprenet@gmail.com
+    Date: 2026-04-15 10:52:43
+-->
+<xsl:stylesheet version = "2.0"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+    xmlns:page="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15">
 
+    <xsl:output method="xml" encoding="utf-8"/>
+
+    <xsl:template match="@*|node()">
+        <xsl:copy>
+            <xsl:apply-templates select="@*|node()"/>
+        </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="//page:Page">
+            <PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15/pagecontent.xsd">
+<!--
+            <xsl:value-of select="@imageFilename"/>
+-->
+            <xsl:apply-templates/>
+            </PcGts>
+    </xsl:template>
+    <xsl:template match="/*">
+        <MetaPage>
+            <xsl:apply-templates select="./page:Page"/>
+        </MetaPage>
+    </xsl:template>
+</xsl:stylesheet>
+"""

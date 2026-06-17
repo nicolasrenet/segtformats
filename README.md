@@ -10,7 +10,7 @@ SegtFormat allows for handling a subset of features found in common page layout 
 + validation options (PAGE, JSON)
 + no fancy visuals: however a page segmentation can be conveniently rendered in ASCII on the terminal, for diagnosis purpose.
 
-[^1]: compare with PAGE, where one document may label _n_ images (each corresponding to exactly one `Page` element), and ALTO, where one document labels exactly one image and possibly _n_ pages within it.
+[^1]: Compare with PAGE, where one document may label _n_ images (each corresponding to exactly one `Page` element), and ALTO, where one document labels exactly one image and possibly _n_ pages within it.
 
 ![](doc/formats_diagram.png)
 
@@ -97,6 +97,12 @@ print(sgf.anyseg_to_ascii('tests/data/btv1b84473026_f25.chocomufin.xml', lines=1
 
   ```bash
   anyseg_to_ascii --file_paths tests/data/*.xml
+  ```
+
++ `page_xml_split`: Split multi-page PAGE label into as many files (i.e. one label per image). Eg.
+
+  ```bash
+  page_xml_split --file_paths tests/data/2923.xml
   ```
 
 Get the help on any `<command>` with
