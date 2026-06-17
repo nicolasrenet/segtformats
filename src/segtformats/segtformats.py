@@ -148,7 +148,8 @@ def page_xml_from_segmentation_dict(seg_dict: str, output_file: str='', with_tex
 
 def segmentation_dict_from_page_xml(page_source: str, get_text=True, regions_as_boxes=True, strict=False, region_line_overlap=.9) -> dict[str,Union[str,list[Any]]]:
     """Given a pageXML file name, return a JSON dictionary describing the lines.
-    The resulting dictionary is flat, with two separate entries for lines and regions.
+    If the input file has more than one `<Page>` element, a corre
+
 
     Args:
         page_source (str): path of a PageXML file, or a PageXML string.
@@ -164,7 +165,7 @@ def segmentation_dict_from_page_xml(page_source: str, get_text=True, regions_as_
             threshold are removed from the output dictionary.
 
     Returns:
-        dict[str,Union[str,list[Any]]]: a dictionary of the form::
+        dict: a dictionary of the form::
 
             {"metadata": { ... },
              "text_direction": ..., "type": "baselines", 
@@ -215,25 +216,6 @@ def segmentation_dict_from_page_xml(page_source: str, get_text=True, regions_as_
                 return None
             return line_dict
 
-    def line_to_region_overlap(line_dict: dict, region_dict: dict):
-        """ Check overlap between line's bbox and region boundaries."""
-        line_bbox = shapely.envelope( shapely.multipoints( np.array( line_dict['coords'] )))
-        reg_bbox = shapely.envelope( shapely.multipoints( np.array( region_dict['coords'] )))
-        return reg_bbox.intersection( line_bbox ).area / line_bbox.area
-
-    def extend_box( box_coords, inner_coords ):
-        """Extend box coordinates to encompass inner boundaries """
-        inner_xs, inner_ys = [ pt[0] for pt in inner_coords ], [ pt[1] for pt in inner_coords ]
-        inner_left, inner_right, inner_top, inner_bottom = min(inner_xs), max(inner_xs), min(inner_ys), max(inner_ys)
-        return [ [ inner_left if inner_left < box_coords[0][0] else box_coords[0][0],
-                 inner_top if inner_top < box_coords[0][1] else box_coords[0][1]],
-                [ inner_right if inner_right > box_coords[1][0] else box_coords[1][0],
-                 inner_top if inner_top < box_coords[1][1] else box_coords[1][1]],
-                [ inner_right if inner_right > box_coords[2][0] else box_coords[2][0],
-                 inner_bottom if inner_bottom > box_coords[2][1] else box_coords[2][1]],
-                [ inner_left if inner_left < box_coords[3][0] else box_coords[3][0],
-                 inner_bottom if inner_bottom > box_coords[3][1] else box_coords[3][1]],]
-
     def process_region( region: ET.Element, region_accum: list, parent_region_ids:list ):
         # order of regions: inner -> outer
         parent_region_ids = [ region.get('id') ] + parent_region_ids
@@ -255,16 +237,6 @@ def segmentation_dict_from_page_xml(page_source: str, get_text=True, regions_as_
                 line_entry = construct_line_entry( elt )
                 if line_entry is None:
                     continue
-                overlap = line_to_region_overlap(line_entry, region_accum[-1] )
-                if overlap < 0.5:
-                    if strict:
-                        raise ValueError("Page {}, region {}, l. {}: boundaries are not contained within its region. To disable this exception, pass strict=False".format(page, parent_region_ids[0], line_idx))
-                    # extend region to fit the line
-                    #elif overlap >= region_line_overlap:
-                    #    region_accum[-1]['coords'] = extend_box( region_accum[-1]['coords'], line_entry['coords']+line_entry['baseline'] )
-                    #else:
-                    #    print(f"Line {line_entry['id']} does not meet overlap threshold with region ({overlap:.2f} < {region_line_overlap}): skipping.")
-                    #    continue
                 region_accum[-1]['lines'].append( line_entry )
 
             elif elt.tag == "{{{}}}TextRegion".format(ns['pc']):
@@ -386,6 +358,7 @@ def segdict_sink_lines_deprecate(segdict: dict):
 def alto_to_page_xml_string( segfile: str, xslfile=None)->str:
     """
     ALTO → Page conversion tool with embedded XSL stylesheet.
+    The `<Page>`-level in the ALTO tree is ignored: regions are extracted at the `<TextBlock>`-level.
 
     Args:
         segfile (str): segmentation data (ALTO format)
