@@ -10,7 +10,7 @@ SegtFormat allows for handling a subset of features found in common page layout 
 + validation options (PAGE, JSON)
 + no fancy visuals: however a page segmentation can be conveniently rendered in ASCII on the terminal, for diagnosis purpose.
 
-[^1]: compare with PAGE, where one document may label $n$ images (each corresponding to exactly one `Page` element), and ALTO, where one document labels exactly one image and possibly $n$ pages within it.
+[^1]: compare with PAGE, where one document may label _n_ images (each corresponding to exactly one `Page` element), and ALTO, where one document labels exactly one image and possibly _n_ pages within it.
 
 ![](doc/formats_diagram.png)
 
