@@ -16,18 +16,29 @@ SegtFormat allows for handling a subset of features found in common page layout 
 
 ## How to install
 
+<!--
 
   ```bash
   pip install segtformats
   ```
 
 or from GitHub:
+-->
+
+From GitHub:
 
   ```bash
   git clone git@github.com:nicolasrenet/segtformats.git
   cd segtformats
   pip install .
   ```
+
+From PyPy: 
+ 
+  ```bash
+  TBA
+  ```
+
 
 ## How to use
 
