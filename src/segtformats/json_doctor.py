@@ -35,7 +35,7 @@ def main():
         'drop_transcription': (False, "Remove line transcription, if it exists."),
         'repair': (False, "Repair a faulty dictionary: re-assign lines to their proper regions; expand regions to include every pixel of the line polygon."),
         'diagnose': (False, "Run a diagnosis, scanning for potential issues."),
-        'delete_line_features': ([], "Line items to be removed (used with caution!)"),
+        #'delete_line_features': FargvPositional(default=[], description="Line items to be removed (use with caution!)"),
         'verbosity': (2,"Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
         "comment": ('',"A text string to be added to the <Comments> elt."),
     }
@@ -69,12 +69,12 @@ def main():
             line_dicts = sgf.line_dicts_from_segmentation_dict( segdict )
 
             # delete unwanted features
-            if args.delete_line_features:
-                for line in line_dicts:
-                    for key in args.delete_line_features:
-                        if key not in line:
-                            continue
-                        del line[key]
+#            if args.delete_line_features:
+#                for line in line_dicts:
+#                    for key in args.delete_line_features:
+#                        if key not in line:
+#                            continue
+#                        del line[key]
 
             # remove transcriptions
             if args.drop_transcription:
