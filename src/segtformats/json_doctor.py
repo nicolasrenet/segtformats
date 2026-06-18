@@ -19,12 +19,14 @@ import fargv
 from fargv import FargvPositional
 
 from . import segtformats as sgf
+from . import set_logging_level, logger
 
 
 if __name__ == '__main__':
     main()
 
 def main():
+
     p = {
         'file_paths': FargvPositional(default=[], description="Input file (JSON)."),
         'input_suffix': ('.lines.pred.json', "Input file suffix."),
@@ -34,11 +36,13 @@ def main():
         'repair': (False, "Repair a faulty dictionary: re-assign lines to their proper regions; expand regions to include every pixel of the line polygon."),
         'diagnose': (False, "Run a diagnosis, scanning for potential issues."),
         'delete_line_features': ([], "Line items to be removed (used with caution!)"),
-        'verbose': (False, "Verbose."),
+        'verbosity': (2,"Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
         "comment": ('',"A text string to be added to the <Comments> elt."),
     }
 
     args, _ = fargv.parse( p )
+
+    set_logging_level( args.verbosity )
 
     for file_path in args.file_paths:
         json_path = Path( file_path )
@@ -48,18 +52,18 @@ def main():
             segdict = json.load( json_if )
 
             if args.diagnose:
-                print("File diagnosis")
+                logger.info("File diagnosis")
                 sgf.json_doctor( segdict, dry_run=True )
                 continue
 
             if args.repair:
-                print("Repairing file")
+                logger.info("Repairing file")
                 segdict = sgf.json_doctor( segdict )
 
             output_file_path = Path( file_path.replace( args.input_suffix, args.output_suffix )) if args.output_suffix else None
-            print(f'{file_path} → {output_file_path}')
+            logger.info(f'{file_path} → {output_file_path}')
             if output_file_path and not args.overwrite_existing and output_file_path.exists():
-                print(f"Existing {output_file_path}: skipping." )
+                logger.info(f"Existing {output_file_path}: skipping." )
                 continue
 
             line_dicts = sgf.line_dicts_from_segmentation_dict( segdict )
@@ -94,4 +98,5 @@ def main():
                         of.write( json.dumps( segdict, indent=2))
                 else:
                     print( json.dumps( segdict, indent=2 ))
+    return 0
 

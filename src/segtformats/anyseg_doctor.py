@@ -14,11 +14,13 @@ import fargv
 from fargv import FargvChoice, FargvPositional
 
 from . import segtformats as sgf
+from . import set_logging_level, logger
 
 if __name__ == '__main__':
     main()
 
 def main():
+
     p = {
             "segfile_paths": FargvPositional(default=[], description="A JSON line segmentation file (e.g <prefix>.lines.pred.json)."),
             "overwrite_existing": (False, "Do not overwrite existing output file"),
@@ -27,14 +29,15 @@ def main():
             "validate": False,
             "output_format": FargvChoice(['', 'json', 'page'], description="Output format (if empty: JSON on standard output."),
             "output_suffix": ('',"If empty, output file's suffix is determined by output format (.json or .xml)"),
-            "verbose": True,
+            'verbosity': (2,"Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
     }
     args, _ = fargv.parse( p )
 
+    set_logging_level( args.verbosity )
+
     for segfile_path_str in args.segfile_paths:
 
-        if args.verbose:
-            print(f"{segfile_path_str}:", end='')
+        logger.info(f"{segfile_path_str}:", end='')
         segdict = None
         segmentation_format = sgf.get_format( segfile_path_str )
         if segmentation_format == sgf.SegFormat.Unknown:
@@ -71,8 +74,7 @@ def main():
         replacement_suffix = ('.json' if args.output_format=='json' else '.xml') if not args.output_suffix else args.output_suffix
         output_path = re.sub(r'\.[^.]+$', r'{}'.format(replacement_suffix), segfile_path_str ) 
         if not args.overwrite_existing and Path(output_path).exists():
-            if args.verbose:
-                print( " (file exists)")
+            logger.info( " (file exists)")
             continue
         if args.output_format == 'json':
             with open(output_path, 'w') as json_outf:
@@ -80,6 +82,7 @@ def main():
         elif args.output_format == 'page':
             sgf.page_xml_from_segmentation_dict( segdict, output_file=output_path )
 
-        if args.verbose:
-            print(f"→ {output_path}")
+        logger.info(f"→ {output_path}")
+
+    return 0
 

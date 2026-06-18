@@ -14,6 +14,8 @@ import fargv
 from fargv import FargvChoice, FargvPositional
 
 from . import segtformats as sgf
+from . import set_logging_level, logger
+
 
 if __name__ == '__main__':
     main()
@@ -26,9 +28,12 @@ def main():
             "repair": (False, "If True, fix semantic errors in the segmentation (line-to-region assignment, region boundaries)."),
             "validate": False,
             "output_format": FargvChoice(['json', 'stdout'], description="Output format"),
-            "verbose": True,
+            'verbosity': (2,"Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
     }
+
     args, _ = fargv.parse( p )
+    
+    set_logging_level( args.verbosity )
 
     for segfile_path_str in args.segfile_paths:
 
@@ -36,8 +41,7 @@ def main():
 
         segdict = sgf.anyseg_to_dict( segfile_path_str )
         if not segdict:
-            if args.verbose:
-                print( status_string + '____' )
+            logger.info( status_string + '____' )
             continue
         status_string += 'C'
 
@@ -47,8 +51,7 @@ def main():
 
         if args.validate:
             if not sgf.json_validate( segdict ):
-                if args.verbose:
-                    print( status_string + '__' )
+                logger.info( status_string + '__' )
                 continue
             status_string += 'V'
 
@@ -58,11 +61,10 @@ def main():
         else:
             json_path = re.sub(r'\.[^.]+$', r'.json', segfile_path_str )
             if not args.overwrite_existing and Path(json_path).exists():
-                if args.verbose:
-                    print( status_string + "_ (file exists)".format( json_path ))
+                logger.info( status_string + "_ (file exists)".format( json_path ))
                 continue
             with open(json_path, 'w') as json_outf:
                 json_outf.write( segdict_str )
-                if args.verbose:
-                    print( status_string + f"W → {json_path}")
+                logger.info( status_string + f"W → {json_path}")
 
+    return 0

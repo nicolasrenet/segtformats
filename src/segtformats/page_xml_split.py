@@ -14,7 +14,7 @@ from fargv import FargvPositional
 from jsonschema import validate
 
 from . import segtformats as sgf
-
+from . import set_logging_level, logger
 
 
 if __name__ == '__main__':
@@ -27,16 +27,17 @@ def main():
         'file_paths': FargvPositional(default=[]),
         'overwrite_existing': (True, "Overwrite an existing file."),
         "comment": ('',"A text string to be added to the <Comments> elt."),
-        "verbose": False,
+        'verbosity': (2,"Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
     }
 
     args, _ = fargv.parse( p )
 
+    set_logging_level( args.verbosity )
+
     for xml_path in args.file_paths:
 
-        if args.verbose:
-            print(xml_path)
+        logger.info(xml_path)
 
         created=sgf.page_xml_split( xml_path, overwrite_existing=args.overwrite_existing )
         filenames = '\n'.join(created)
-        print(f"Created:\n{filenames}")
+        logger.info(f"Created:\n{filenames}")

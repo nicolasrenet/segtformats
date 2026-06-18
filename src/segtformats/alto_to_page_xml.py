@@ -7,23 +7,35 @@ import sys
 import re
 from pathlib import Path
 
+import fargv
+from fargv import FargvPositional
 from . import segtformats as sgf
-
-USAGE=f"USAGE: {sys.argv[0]} <alto file>.xml [<PageXML output file]"
+from . import set_logging_level, logger
 
 if __name__ == '__main__':
     main()
 
 def main():
 
-    if len(sys.argv) < 2 or re.match(r'--?h', sys.argv[1]):
-        print(USAGE)
-        sys.exit()
+    p = {
+         'file_paths': FargvPositional(default=[], description="Input file (ALTO)."),
+         'input_suffix': ('.xml', "Input file suffix."),
+         'output_suffix': ('', "Output file suffix; if empty, write on standard output"),
+         'overwrite_existing': (False, "Overwrite an existing output file."),
+         'verbosity': (2,"Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
+    }
 
-    source_file = sys.argv[1]
+    args, _ = fargv.parse( p )
 
-    if len(sys.argv)>2:
-        print(f"{sys.argv[1]} → {sys.argv[2]}")
-        sgf.alto_to_page_xml( source_file, pagexml_filename=sys.argv[2] )
-    else:
-        sgf.alto_to_page_xml( source_file )
+    set_logging_level( args.verbosity )
+
+    for file_path in args.file_paths:
+
+        if not args.output_suffix:
+            sgf.alto_to_page_xml( file_path )
+        else:
+            output_filename = re.sub(r'{}$'.format( args.input_suffix ), args.output_suffix, file_path )
+            if overwrite_existing or not Path( output_filename ).exists():
+                sgf.alto_to_page_xml( file_path, pagexml_filename=output_filename )
+
+    return 0

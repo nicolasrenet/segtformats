@@ -25,4 +25,15 @@ help( sgf )
 ```
 
 """
+import logging
+
+logging_format="%(asctime)s - %(levelname)s: %(filename)s: %(funcName)s - %(message)s"
+logging_levels = {0: logging.ERROR, 1: logging.WARNING, 2: logging.INFO, 3: logging.DEBUG }
+logging.basicConfig( level=logging.INFO, format=logging_format, force=True )
+logger = logging.getLogger(__name__)
+
+def set_logging_level( verbosity ):
+    if verbosity != 2:
+        logging.basicConfig( level=logging_levels[verbosity], format=logging_format, force=True )
+
 

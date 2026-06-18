@@ -14,7 +14,7 @@ from fargv import FargvChoice, FargvPositional
 from jsonschema import validate
 
 from . import segtformats as sgf
-
+from . import set_logging_level, logger
 
 
 if __name__ == '__main__':
@@ -30,22 +30,23 @@ def main():
         'get_text': (True, "Extract text content of the line, if it exists"),
         'overwrite_existing': (False, "Overwrite an existing file."),
         "comment": ('',"A text string to be added to the <Comments> elt."),
-        "verbose": False,
+        'verbosity': (2,"Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
         "repair": (False, "Repair a faulty dictionary (reassign lines to regions, fix region bounding boxes"),
         "validate": (False, "Validate against a JSON schema."),
     }
 
     args, _ = fargv.parse( p )
 
+    set_logging_level( args.verbosity )
+
     for xml_path in args.file_paths:
 
-        if args.verbose:
-            print(xml_path)
+        logger.info(xml_path)
 
         segdict = sgf.segmentation_dict_from_page_xml( xml_path, get_text=args.get_text )
 
         if args.repair:
-            segdict = sgf.json_doctor( segdict, verbose=args.verbose )
+            segdict = sgf.json_doctor( segdict, verbose=(True if args.verbose >= 3 else False) )
 
         # Raise an exception if invalid
         if args.validate:

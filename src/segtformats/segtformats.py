@@ -22,7 +22,7 @@ from io import StringIO
 from enum import Enum
 from datetime import datetime 
 from typing import Union, Any
-
+import logging
 
 import numpy as np
 import shapely
@@ -33,7 +33,6 @@ from unidecode import unidecode
 from .segtformat_documents import JsonSchema, XslAltoPage, PageXmlSchema
 
 SegFormat = Enum('SegFormat', [('Unknown',0),('PAGE',1), ('ALTO',2), ('JSON',3)])
-
 
 def get_format( segfile: str )->int:
     """
@@ -364,7 +363,11 @@ def segmentation_dict_from_page_xml(page_source: str, get_text=True, regions_as_
     page_dict['type']='baselines'
     page_dict['text_direction']='horizontal-lr'
 
-    pageElement = page_root.find('./pc:Page', ns)
+    pageElements = page_root.findall('./pc:Page', ns)
+    if len(pageElements) > 1:
+        logging.warning(f"Found {len(pageElements)} Page elements: the resulting dictionary only includes the first one.")
+
+    pageElement = pageElements[0]
     
     page_dict['image_filename']=pageElement.get('imageFilename')
     page_dict['image_width'], page_dict['image_height']=[ int(pageElement.get('imageWidth')), int(pageElement.get('imageHeight'))]
@@ -410,7 +413,6 @@ def segdict_sink_lines_deprecate(segdict: dict):
             else:
                 for reg in segdict['regions']:
                     if (line['coords'] >= np.min( reg['coords'], axis=0 )).all() and (line['coords'] <= np.max( reg['coords'], axis=0 )).all():
-                        #print("Check coordinates")
                         if 'regions' not in line:
                             line['regions']=[]
                         line['regions'].append( reg['id'] )
@@ -524,7 +526,7 @@ def json_validate( segdict: dict, schema_dict=None)->bool:
     try:
         jsonschema.validate( instance=segdict, schema=JsonSchema )
     except (jsonschema.exceptions.ValidationError, jsonschema.exceptions.SchemaError) as e:
-        print(e)
+        logging.info(e)
         return 0
     return 1
      
@@ -548,14 +550,14 @@ def page_xml_validate( page_source: str, schema_source: str=PageXmlSchema ):
         if Path(schema_source).exists():
             xmlschema = LET.parse( schema_source )
     if not xmlschema:
-        print("Could not parse a schema.")
+        logging.warning("Could not parse a schema.")
         return False
     try:
         page_root = LET.fromstring( page_source )
-        print(f"Read from string (type={type(page_source)}")
+        logging.debug(f"Read from string (type={type(page_source)}")
     except (LET.ParseError, LET.XMLSyntaxError) as e:
         page_root = LET.parse( page_source )
-        print(f"Read from file {page_source}")
+        logging.debug(f"Read from file {page_source}")
 
     return xmlschema.validate( page_root )
 
@@ -596,8 +598,7 @@ def json_doctor( segdict: dict, operations={'region_fit': True, 'line_surgery': 
             r = segdict['image_width']-1
         if b >= segdict['image_height']:
             b = segdict['image_height']-1
-        #if verbose:
-        #    print(f"extended region: {[[l,t],[r,t],[r,b],[l,b]]}")
+        logging.debug(f"extended region: {[[l,t],[r,t],[r,b],[l,b]]}")
         return [[l,t],[r,t],[r,b],[l,b]]
     dry_run_str = "[dry-run]" if dry_run else ''
     segdict_new = copy.deepcopy( segdict )
@@ -622,16 +623,16 @@ def json_doctor( segdict: dict, operations={'region_fit': True, 'line_surgery': 
         if image_boundary_ok:
             print(' ✓')
         print("2. Line-to-region assignment {}...".format(dry_run_str), end='')
-    segdict_butchered, changes = segdict_reassign_lines( segdict_new, verbose=verbose )
+    segdict_butchered, changes, logs = segdict_reassign_lines( segdict_new )
     if changes and (verbose or dry_run):
     #if verbose and segdict_butchered != segdict_new:
-        print()
+        logging.debug( logs )
         for l,rr in changes.items():
             print(f"line {l}: [ {rr[0]} → ] {rr[1]}")
     elif dry_run and not verbose:
         print(' ✓')
     if verbose or dry_run:
-        print("Region boundary adjustment {}...".format(dry_run_str))
+        logging.info("Region boundary adjustment {}...".format(dry_run_str))
     for reg in segdict_butchered['regions']:
         inner_line_coords = [ c for l in reg['lines'] for c in l['coords']]
         if not inner_line_coords:
@@ -645,7 +646,7 @@ def json_doctor( segdict: dict, operations={'region_fit': True, 'line_surgery': 
     return segdict_butchered
 
 
-def segdict_reassign_lines( segdict: dict, verbose=False):
+def segdict_reassign_lines( segdict: dict):
     """
     Given a segmentation dictionary, reassign lines to their most likely containing regions:
     assign each line to region with maximum overlap, as a ratio of the line's area; between
@@ -655,8 +656,9 @@ def segdict_reassign_lines( segdict: dict, verbose=False):
         segdict (dict): a segmentation dictionary, DiDip-style, with regions a top-level element.
 
     Returns:
-        tuple[dict,dict]: a pair with the modified segmentation dictionary and a (possibly empty) 
-            dictionary of changes of the form `{<line id>: (<old region id>, <new region id>)}`
+        tuple[dict,dict,str]: a triplet with the modified segmentation dictionary, a (possibly empty) 
+            dictionary of changes of the form `{<line id>: (<old region id>, <new region id>)}`,
+            and some logs.
     """
     def line_to_region_overlap(line_dict: dict, region_dict: dict):
         """ Check overlap between line's bbox and region boundaries."""
@@ -710,15 +712,15 @@ def segdict_reassign_lines( segdict: dict, verbose=False):
         r_id, l_id = segdict['regions'][l_r_info_pair[0]]['id'], lines[l_idx]['id']
         if line_to_region_init[l_id] != r_id:
             line_to_region_changes[l_id]=(line_to_region_init[l_id], r_id)
-    if verbose: 
-        for r in new_segdict['regions']:
-            r_id, r_l, r_t, r_r, r_b = r['id'].replace('eSc_textblock_',''), *(np.array(r['coords']).min(axis=0).tolist()), *(np.array(r['coords']).max(axis=0).tolist())
-            print(f"region {r_id}: [<{r_l},{r_r}>, <{r_t}, {r_b}>]")
-            region_bboxes=[ (l['id'].replace('eSc_line_',''), *(np.array(l['coords']).min(axis=0).tolist()), *(np.array(l['coords']).max(axis=0).tolist()) ) for l in r['lines'] ]
-            for  l_id, l_l, l_t, l_r, l_b in sorted( region_bboxes, key=lambda x: x[2] ):
-                print(f"\tline {l_id}: [<{l_l},{l_r}>, <{l_t},{l_b}>]")
+    logs = []
+    for r in new_segdict['regions']:
+        r_id, r_l, r_t, r_r, r_b = r['id'].replace('eSc_textblock_',''), *(np.array(r['coords']).min(axis=0).tolist()), *(np.array(r['coords']).max(axis=0).tolist())
+        logs.append( f"region {r_id}: [<{r_l},{r_r}>, <{r_t}, {r_b}>]" ) 
+        region_bboxes=[ (l['id'].replace('eSc_line_',''), *(np.array(l['coords']).min(axis=0).tolist()), *(np.array(l['coords']).max(axis=0).tolist()) ) for l in r['lines'] ]
+        for  l_id, l_l, l_t, l_r, l_b in sorted( region_bboxes, key=lambda x: x[2] ):
+            logs.append(f"\tline {l_id}: [<{l_l},{l_r}>, <{l_t},{l_b}>]")
 
-    return (new_segdict, line_to_region_changes)
+    return (new_segdict, line_to_region_changes, '\n'.join(logs))
 
 
 def flatten_segmentation_dict( segmentation_dict: dict ) -> dict:
@@ -824,7 +826,7 @@ def anyseg_to_dict( segfile: str )->dict:
     segdict = None
     segmentation_format = get_format( segfile )
     if segmentation_format == SegFormat.Unknown:
-        print(f"{Path(__file__).name}.anyseg_to_ascii: Could not determine input format. Abort.")
+        logging.info(f"{Path(__file__).name}.anyseg_to_ascii: Could not determine input format. Abort.")
         return ''
     if segmentation_format == SegFormat.JSON:
         with open(segfile) as seg_if:
@@ -901,10 +903,10 @@ def segdict_to_ascii( segdict:dict, scale_hw=(.01,.02), lines=0, summary=True, t
     width, height = segdict['image_width'], segdict['image_height']
     if type(scale_hw) in [float,int]:
         if scale_hw < .5:
-            print("Warning: scaling factor to be applied to the default display ratio set to lowest permissible value (0.5)")
+            logging.warning("Scaling factor to be applied to the default display ratio set to lowest permissible value (0.5)")
             scale_hw = .5
         elif scale_hw > 3.0:
-            print("Warning: scaling factor to be applied to the default display ratio set to highest permissible value (3.0)")
+            logging.warning("Scaling factor to be applied to the default display ratio set to highest permissible value (3.0)")
             scale_hw = 3.0
         scale_hw=[ s*scale_hw for s in default_scale ] 
     canvas = np.full( (np.array([height,width])*scale_hw).astype('uint16'), ord(' '))

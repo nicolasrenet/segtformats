@@ -14,6 +14,7 @@ from fargv import FargvChoice, FargvPositional
 from jsonschema import validate
 
 from . import segtformats as sgf
+from . import set_logging_level, logger
 
 
 if __name__ == '__main__':
@@ -27,17 +28,18 @@ def main():
         'input_suffix': '.xml',
         'overwrite_existing': (False, "Overwrite an existing file."),
         "comment": ('',"A text string to be added to the <Comments> elt."),
-        "verbose": False,
+        "verbosity": (2,"Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
         "repair": (False, "Repair a faulty dictionary (reassign lines to regions, fix region bounding boxes"),
         "validate": (False, "Validate against a JSON schema."),
     }
 
     args, _ = fargv.parse( p )
 
+    set_logging_level( args.verbosity )
+
     for xml_path in args.file_paths:
 
-        if args.verbose:
-            print(xml_path)
+        logger.debug(xml_path)
 
         segdict = sgf.alto_to_segmentation_dict( xml_path )
 
@@ -54,10 +56,10 @@ def main():
         else:
             json_path = Path(xml_path.replace(args.input_suffix, '.json'))
             if not args.overwrite_existing and json_path.exists():
-                print("File {} exists: abort.".format( json_path ))
+                logger.info("File {} exists: abort.".format( json_path ))
             elif not re.search( r'{}$'.format(args.input_suffix), Path(xml_path).name):
-                print(f"Input file path '{xml_path.name}' does not match input suffix '{args.input_suffix}': output aborted.")
+                logger.warning(f"Input file path '{xml_path.name}' does not match input suffix '{args.input_suffix}': output aborted.")
             else:
                 with open(json_path, 'w') as json_outf:
                     json_outf.write( segdict_str )
-
+    return 0
