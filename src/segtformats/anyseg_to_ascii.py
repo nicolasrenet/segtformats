@@ -37,7 +37,6 @@ Eg.::
 """
 import os
 import sys
-import re
 import tty
 import termios
 from pathlib import Path
@@ -54,7 +53,7 @@ if __name__ == '__main__':
 def main():
 
     p = {
-        'file_paths': FargvVariadic([], description="Input file (JSON, Page, Alto)."),
+        "file_paths": FargvVariadic([], description="Input file (JSON, Page, Alto)."),
         "lines": FargvChoice(['1','2','0'], description="0=lines omitted, 1=lines within region limits, 2=lines within canvas limits."),
         "scale": (1.0, "Factor to be applied to the default scale."),
         "repair": (False, "Try repairing a faulty segmentation before rendition (file is not modified)."),
@@ -81,7 +80,8 @@ def main():
     args, _ = fargv.parse( p )
     if not args.file_paths:
         print("Input file name expected! Abort.")
-        sys.exit()
+        return 1
+
     file_count=0
     lines = int(args.lines)
     zoom = 1 
@@ -143,3 +143,5 @@ def main():
         # no matter what, restore default terminal settings
         termios.tcsetattr( sys.stdin, termios.TCSADRAIN, setting )
         
+
+    return 0

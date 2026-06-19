@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Union, Any
 
 import fargv
-from fargv import FargvChoice, FargvPositional
+from fargv import FargvPositional, FargvChoice
 from jsonschema import validate
 
 from . import segtformats as sgf
@@ -25,25 +25,30 @@ def main():
 
     p = {
         'file_paths': FargvPositional(default=[]),
-        'output_format': FargvChoice(['json', 'stdout'], description="Output format"),
+        'out': ('', "Output to filename <out>: set to 'auto' for output to filename <input stem>.<output_suffix>."),
         'input_suffix': '.xml',
+        'output_suffix': '.json',
         'get_text': (True, "Extract text content of the line, if it exists"),
         'overwrite_existing': (False, "Overwrite an existing file."),
-        "comment": ('',"A text string to be added to the <Comments> elt."),
-        'verbosity': (2,"Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
+        'comment': ('',"A text string to be added to the <Comments> elt."),
+        'verbosity': FargvChoice(['2','0','1','3'], description="Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
         "repair": (False, "Repair a faulty dictionary (reassign lines to regions, fix region bounding boxes"),
         "validate": (False, "Validate against a JSON schema."),
     }
 
     args, _ = fargv.parse( p )
 
-    set_logging_level( args.verbosity )
+    set_logging_level( int(args.verbosity) )
 
-    for xml_path in args.file_paths:
+    for file_path in args.file_paths:
 
-        logger.info(xml_path)
+        logger.info(file_path)
 
-        segdict = sgf.segmentation_dict_from_page_xml( xml_path, get_text=args.get_text )
+        input_format = sgf.get_format( file_path )
+        if input_format != sgf.SegFormat.PAGE:
+            logger.error(f"File is not a PAGE file (format={input_format}): skipping.")
+            continue
+        segdict = sgf.segmentation_dict_from_page_xml( file_path, get_text=args.get_text )
 
         if args.repair:
             segdict = sgf.json_doctor( segdict, verbose=(True if args.verbose >= 3 else False) )
@@ -53,15 +58,25 @@ def main():
             sgf.json_validate( segdict )
 
         segdict_str = json.dumps( segdict, indent=2 )
-        if args.output_format == 'stdout':
-            print( segdict_str )
-        else:
-            json_path = Path(xml_path.replace(args.input_suffix, '.json'))
-            if not args.overwrite_existing and json_path.exists():
-                print("File {} exists: abort.".format( json_path ))
-            elif not re.search( r'{}$'.format(args.input_suffix), Path(xml_path).name):
-                print(f"Input file path '{xml_path.name}' does not match input suffix '{args.input_suffix}': output aborted.")
-            else:
-                with open(json_path, 'w') as json_outf:
-                    json_outf.write( segdict_str )
 
+        if not args.out:
+            print( segdict_str )
+            continue
+
+        out_path = ''
+        if args.out == 'auto':
+            if not re.search( r'{}$'.format(args.input_suffix), Path(file_path).name):
+                logger.warning(f"Input file path '{Path(file_path).name}' does not match input suffix '{args.input_suffix}': output aborted.")
+                continue
+            out_path = Path(re.sub(r'{}$'.format( args.input_suffix ), args.output_suffix, file_path )) 
+        else:
+            out_path = args.out
+        logger.debug(f"Output file = {out_path}")
+
+        if not args.overwrite_existing and out_path.exists():
+            logger.info("File {} exists: skipping.".format( out_path ))
+            continue
+        with open(out_path, 'w') as json_outf:
+            json_outf.write( segdict_str )
+
+    return 0

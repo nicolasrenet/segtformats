@@ -4,13 +4,10 @@ PageXML -> JSON conversion.
 """
 
 import sys
-import json
-import re
 from pathlib import Path
-from typing import Union, Any
 
 import fargv
-from fargv import FargvPositional
+from fargv import FargvPositional, FargvChoice
 from jsonschema import validate
 
 from . import segtformats as sgf
@@ -26,18 +23,18 @@ def main():
     p = {
         'file_paths': FargvPositional(default=[]),
         'overwrite_existing': (True, "Overwrite an existing file."),
-        "comment": ('',"A text string to be added to the <Comments> elt."),
-        'verbosity': (2,"Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
+        'comment': ('',"A text string to be added to the <Comments> elt."),
+        'verbosity': FargvChoice(['2','0','1','3'], description="Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
     }
 
     args, _ = fargv.parse( p )
 
-    set_logging_level( args.verbosity )
+    set_logging_level( int(args.verbosity) )
 
-    for xml_path in args.file_paths:
+    for file_path in args.file_paths:
 
-        logger.info(xml_path)
+        logger.info(file_path)
 
-        created=sgf.page_xml_split( xml_path, overwrite_existing=args.overwrite_existing )
+        created=sgf.page_xml_split( file_path, overwrite_existing=args.overwrite_existing )
         filenames = '\n'.join(created)
         logger.info(f"Created:\n{filenames}")

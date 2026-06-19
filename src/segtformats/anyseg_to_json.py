@@ -23,23 +23,27 @@ if __name__ == '__main__':
 def main():
 
     p = {
-            "segfile_paths": FargvPositional(default=[], description="A JSON line segmentation file (e.g <prefix>.lines.pred.json)."),
-            "overwrite_existing": (False, "Do not overwrite existing output file"),
-            "repair": (False, "If True, fix semantic errors in the segmentation (line-to-region assignment, region boundaries)."),
-            "validate": False,
-            "output_format": FargvChoice(['json', 'stdout'], description="Output format"),
-            'verbosity': (2,"Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
+        "file_paths": FargvPositional(default=[], description="A JSON line segmentation file (e.g <prefix>.lines.pred.json)."),
+        'out': ('', "Output to filename <out>: set to 'auto' for output to filename <input stem>.<output_suffix>."),
+        'output_suffix': '.json',
+        "input_suffix": ('',"If empty, input file's suffix is determined by detected input format (.json or .xml)"),
+        "overwrite_existing": (False, "Do not overwrite existing output file"),
+        "repair": (False, "If True, fix semantic errors in the segmentation (line-to-region assignment, region boundaries)."),
+        "validate": False,
+        "output_format": FargvChoice(['json', 'stdout'], description="Output format"),
+        "verbosity": FargvChoice(['2','0','1','3'], description="Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"), 
     }
 
     args, _ = fargv.parse( p )
     
-    set_logging_level( args.verbosity )
+    set_logging_level( int(args.verbosity) )
 
-    for segfile_path_str in args.segfile_paths:
+    format_to_suffix = { sgf.SegFormat.PAGE: '.xml', sgf.SegFormat.ALTO: '.xml', sgf.SegFormat.JSON: '.json' }
+    for file_path in args.file_paths:
 
-        status_string=f"{segfile_path_str}: "
+        status_string=f"{file_path}: "
 
-        segdict = sgf.anyseg_to_dict( segfile_path_str )
+        segdict, _ = sgf.anyseg_to_dict( file_path )
         if not segdict:
             logger.info( status_string + '____' )
             continue
@@ -56,15 +60,27 @@ def main():
             status_string += 'V'
 
         segdict_str = json.dumps( segdict, indent=2 )
-        if args.output_format == 'stdout':
+
+        if not args.out:
             print( segdict_str )
-        else:
-            json_path = re.sub(r'\.[^.]+$', r'.json', segfile_path_str )
-            if not args.overwrite_existing and Path(json_path).exists():
-                logger.info( status_string + "_ (file exists)".format( json_path ))
+            continue
+        out_path = ''
+
+        if args.out == 'auto':
+            if not re.search( r'{}$'.format(args.input_suffix), Path(file_path).name):
+                logger.warning(f"Input file path '{Path(file_path).name}' does not match input suffix '{args.input_suffix}': output aborted.")
                 continue
-            with open(json_path, 'w') as json_outf:
-                json_outf.write( segdict_str )
-                logger.info( status_string + f"W → {json_path}")
+            out_path = Path(re.sub(r'{}$'.format( args.input_suffix ), args.output_suffix, file_path )) 
+        else:
+            out_path = args.out
+        logger.debug(f"Output file = {out_path}")
+
+
+        if not args.overwrite_existing and Path(out_path).exists():
+            logger.info( status_string + "_ (file exists)".format( out_path ))
+            continue
+        with open(out_path, 'w') as json_outf:
+            json_outf.write( segdict_str )
+            logger.info( status_string + f"W → {json_path}")
 
     return 0

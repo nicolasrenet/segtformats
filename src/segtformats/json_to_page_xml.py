@@ -6,6 +6,7 @@ Script for JSON -> PageXML conversion.
 
 import sys
 import json
+import re
 from pathlib import Path
 from datetime import datetime
 
@@ -23,35 +24,49 @@ def main():
 
     p = {
         'file_paths': FargvPositional(default=[]),
-        'polygon_key': 'coords',
-        'output_format': FargvChoice(['xml', 'stdout']),
+        'out': ('', "Output to filename <out>: set to 'auto' for output to filename <input stem>.<output_suffix>."),
+        'input_suffix': ('.xml', "Input file suffix."),
+        'output_suffix': ('.xml', "Output file suffix; if empty, write on standard output"),
         'with_transcription': (True, "Extract line transcription, if it exists"),
         'overwrite_existing': (False, "Overwrite an existing output file."),
         'comment': ('',"A text string to be added to the <Comments> elt."),
-        'verbosity': (2,"Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
+        'verbosity': FargvChoice(['2','0','1','3'], description="Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
     }
 
     args, _ = fargv.parse( p )
 
-    set_logging_level( args.verbosity ) 
+    set_logging_level( int(args.verbosity) ) 
 
-    for json_path in args.file_paths:
-        json_path=Path( json_path )
-        xml_path = json_path.with_suffix('.xml')
+    for file_path in args.file_paths:
+        file_path=Path( file_path )
+        xml_path = file_path.with_suffix('.xml')
 
-        with open( json_path, 'r') as json_if:
-            logger.warning( json_path )
+        with open( file_path, 'r') as json_if:
+            logger.warning( file_path )
             segdict = json.load( json_if )
             segdict['metadata'].update( {'created': str(datetime.now()), 'creator': __file__ })
             if args.comment:
                 segdict['metadata']['comments']=args.comment
 
-            if args.output_format == 'stdout':
+            if not args.out:
                 sgf.page_xml_from_segmentation_dict( segdict, '', with_text=args.with_transcription )
+                continue
+
+            out_path = ''
+            if args.out == 'auto':
+                if not re.search( r'{}$'.format(args.input_suffix), Path(file_path).name):
+                    logger.warning(f"Input file path '{file_path.name}' does not match input suffix '{args.input_suffix}': output aborted.")
+                    continue
+                out_path = Path(re.sub(r'{}$'.format( args.input_suffix ), args.output_suffix, file_path )) 
             else:
-                if not args.overwrite_existing and xml_path.exists():
-                    logger.info("File {} exists: abort.".format( xml_path ))
-                else:
-                    sgf.page_xml_from_segmentation_dict( segdict, xml_path, polygon_key=args.polygon_key, with_text=args.with_transcription )
+                out_path = args.out
+            logger.debug(f"Output file = {out_path}")
+
+            if not args.overwrite_existing and out_path.exists():
+                logger.info("File {} exists: skipping.".format( out_path ))
+                continue
+            sgf.page_xml_from_segmentation_dict( segdict, out_path, with_text=args.with_transcription ) 
+            
+
 
     return 0

@@ -806,7 +806,7 @@ def anyseg_to_ascii( segfile: str, scale_hw=(.01,.02), lines=0, repair=False, te
     Returns:
         str: a character-based rendition of the layout.
     """
-    segdict = anyseg_to_dict( segfile )
+    segdict, _ = anyseg_to_dict( segfile )
     if not segdict:
         raise ValueError("Could not parse a valid segmentation dictionary. Abort.")
     if repair:
@@ -821,7 +821,7 @@ def anyseg_to_dict( segfile: str )->dict:
         segfile (str): path of a JSON, Page, or Alto segmentation file.
 
     Returns:
-        dict: a segmentation dictionary.
+        tuple[dict,enum]: a pair (segmentation dictionary, input_format)
     """
     segdict = None
     segmentation_format = get_format( segfile )
@@ -835,7 +835,7 @@ def anyseg_to_dict( segfile: str )->dict:
         segdict = segmentation_dict_from_page_xml( segfile )
     elif segmentation_format == SegFormat.ALTO:
         segdict = segmentation_dict_from_page_xml( alto_to_page_xml_string( segfile ))
-    return segdict
+    return (segdict, segmentation_format)
 
 
 def segdict_to_ascii( segdict:dict, scale_hw=(.01,.02), lines=0, summary=True, text=False)->str:

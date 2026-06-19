@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 
 import fargv
-from fargv import FargvPositional
+from fargv import FargvPositional, FargvChoice
 from . import segtformats as sgf
 from . import set_logging_level, logger
 
@@ -19,23 +19,36 @@ def main():
 
     p = {
          'file_paths': FargvPositional(default=[], description="Input file (ALTO)."),
+         'out': ('', "Output to filename <out>: set to 'auto' for output to filename <input stem>.<output_suffix>."),
          'input_suffix': ('.xml', "Input file suffix."),
-         'output_suffix': ('', "Output file suffix; if empty, write on standard output"),
+         'output_suffix': ('.xml', "Output file suffix."),
          'overwrite_existing': (False, "Overwrite an existing output file."),
-         'verbosity': (2,"Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
+         "verbosity": FargvChoice(['2','0','1','3'], description="Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
     }
 
     args, _ = fargv.parse( p )
 
-    set_logging_level( args.verbosity )
+    set_logging_level( int(args.verbosity) )
 
     for file_path in args.file_paths:
 
-        if not args.output_suffix:
+        if not args.out:
             sgf.alto_to_page_xml( file_path )
+            continue
+        
+        out_path = ''
+        if args.out == 'auto':
+            if not re.search( r'{}$'.format(args.input_suffix), Path(file_path).name):
+                logger.warning(f"Input file path '{Path(file_path).name}' does not match input suffix '{args.input_suffix}': output aborted.")
+                continue
+            out_path = re.sub(r'{}$'.format( args.input_suffix ), args.output_suffix, file_path )
         else:
-            output_filename = re.sub(r'{}$'.format( args.input_suffix ), args.output_suffix, file_path )
-            if overwrite_existing or not Path( output_filename ).exists():
-                sgf.alto_to_page_xml( file_path, pagexml_filename=output_filename )
+            out_path = args.out
+        logger.debug(f"Output file = {out_path}")
+
+        if not args.overwrite_existing and Path(out_path).exists():
+            logger.info("File {} exists: skipping.".format( out_path ))
+            continue
+        sgf.alto_to_page_xml( file_path, pagexml_filename=out_path )
 
     return 0
