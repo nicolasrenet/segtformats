@@ -29,7 +29,7 @@ def main():
 
     p = {
         'file_paths': FargvPositional(default=[], description="Input file (JSON)."),
-        'out': ('', "Output to filename <out>: set to 'auto' for output to filename <input stem>.<output_suffix>."),
+        'out': FargvChoice(['','auto'], description="Set to 'auto' for output to filename <input stem>.<output_suffix>; leave empty for standard output."),
         'input_suffix': '.lines.pred.json',
         'output_suffix': '.json', 
         'overwrite_existing': (False, "Overwrite an existing output file."),
@@ -103,8 +103,6 @@ def main():
                 logger.warning(f"Input file path '{Path(file_path).name}' does not match input suffix '{args.input_suffix}': output aborted.")
                 continue
             out_path = re.sub(r'{}$'.format( args.input_suffix ), args.output_suffix, file_path ) 
-        else:
-            out_path = args.out
         logger.debug(f"Output file = {out_path}")
 
         if not args.overwrite_existing and Path(out_path).exists():

@@ -25,7 +25,7 @@ def main():
 
     p = {
         'file_paths': FargvPositional(default=[]),
-        'out': ('', "Output to filename <out>: set to 'auto' for output to filename <input stem>.<output_suffix>."),
+        'out': FargvChoice(['','auto'], description="Set to 'auto' for output to filename <input stem>.<output_suffix>; leave empty for standard output."),
         'input_suffix': '.xml',
         'output_suffix': '.json',
         'get_text': (True, "Extract text content of the line, if it exists"),
@@ -51,7 +51,7 @@ def main():
         segdict = sgf.segmentation_dict_from_page_xml( file_path, get_text=args.get_text )
 
         if args.repair:
-            segdict = sgf.json_doctor( segdict, verbose=(True if args.verbose >= 3 else False) )
+            segdict = sgf.json_doctor( segdict, verbose=(True if int(args.verbosity) >= 3 else False) )
 
         # Raise an exception if invalid
         if args.validate:
@@ -69,8 +69,6 @@ def main():
                 logger.warning(f"Input file path '{Path(file_path).name}' does not match input suffix '{args.input_suffix}': output aborted.")
                 continue
             out_path = Path(re.sub(r'{}$'.format( args.input_suffix ), args.output_suffix, file_path )) 
-        else:
-            out_path = args.out
         logger.debug(f"Output file = {out_path}")
 
         if not args.overwrite_existing and out_path.exists():

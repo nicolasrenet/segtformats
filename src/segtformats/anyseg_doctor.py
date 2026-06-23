@@ -23,7 +23,7 @@ def main():
 
     p = {
         "file_paths": FargvPositional(default=[], description="A JSON line segmentation file (e.g <prefix>.lines.pred.json)."),
-        'out': ('', "Output to filename <out>: set to 'auto' for output to filename <input stem>.<output_suffix>."),
+        'out': FargvChoice(['','auto'], description="Set to 'auto' for output to filename <input stem>.<output_suffix>; leave empty for standard output."),
         "output_suffix": ('',"If empty, output file's suffix is determined by output format (.json or .xml)"),
         "input_suffix": ('',"If empty, input file's suffix is determined by detected input format (.json or .xml)"),
         "overwrite_existing": (False, "Do not overwrite existing output file"),
@@ -77,14 +77,13 @@ def main():
         # What is the output file name?
         output_suffix = args.output_suffix if args.output_suffix else format_to_suffix[ output_format ]
         input_suffix = args.input_suffix if args.input_suffix else format_to_suffix[ segmentation_format ]
+
         out_path = ''
         if args.out == 'auto':
             if not re.search( r'{}$'.format( input_suffix ), Path( file_path ).name):
                 logger.warning(f"Input file path '{Path(file_path).name}' does not match input suffix '{input_suffix}': output aborted.")
                 continue
             out_path = re.sub(r'{}'.input_suffix, output_suffix, file_path )
-        else:
-            out_path = args.out
         logger.debug(f"Output file = {out_path}")
 
         if not args.overwrite_existing and Path(out_path).exists():

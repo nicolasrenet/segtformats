@@ -740,7 +740,7 @@ def flatten_segmentation_dict( segmentation_dict: dict ) -> dict:
         if 'lines' in r:
             del r['lines']
     return {
-            'metadata': segmentation_dict['metadata'],
+            'metadata': segmentation_dict['metadata'],# if 'metadata' in segmentation_dict else {},
             'regions': regions,
             'lines': lines,
     }
