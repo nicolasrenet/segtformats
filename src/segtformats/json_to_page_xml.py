@@ -25,7 +25,7 @@ def main():
     p = {
         'file_paths': FargvPositional(default=[]),
         'out': FargvChoice(['','auto'], description="Set to 'auto' for output to filename <input stem>.<output_suffix>; leave empty for standard output."),
-        'input_suffix': ('.xml', "Input file suffix."),
+        'input_suffix': ('.json', "Input file suffix."),
         'output_suffix': ('.xml', "Output file suffix; if empty, write on standard output"),
         'with_transcription': (True, "Extract line transcription, if it exists"),
         'overwrite_existing': (False, "Overwrite an existing output file."),
@@ -57,7 +57,7 @@ def main():
                 if not re.search( r'{}$'.format(args.input_suffix), Path(file_path).name):
                     logger.warning(f"Input file path '{file_path.name}' does not match input suffix '{args.input_suffix}': output aborted.")
                     continue
-                out_path = Path(re.sub(r'{}$'.format( args.input_suffix ), args.output_suffix, file_path )) 
+                out_path = Path(re.sub(r'{}$'.format( args.input_suffix ), args.output_suffix, str(file_path) )) 
             logger.debug(f"Output file = {out_path}")
 
             if not args.overwrite_existing and out_path.exists():
