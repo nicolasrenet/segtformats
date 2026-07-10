@@ -746,12 +746,13 @@ def flatten_segmentation_dict( segmentation_dict: dict ) -> dict:
     }
 
 
-def line_dicts_from_segmentation_dict( segmentation_dict: dict ) -> list[dict]:
+def line_dicts_from_segmentation_dict( segmentation_dict: dict, by_reference=False ) -> list[dict]:
     """From a segmentation dictionary, return a list of all line dictionaries.
 
     Args:
         segmentation_dict (dict): a dictionary, typically constructed from a JSON file. The 'lines' entry is either
         top-level key, or nested in a region or subregion.
+        by_reference (bool): False by default, i.e. return a copy of the objects; otherwise, return actual references.
     Returns:
         list[dict]: a list of dictionaries; each line stores the id(s) of its containing region(s), the innermost first.
     """
@@ -762,7 +763,10 @@ def line_dicts_from_segmentation_dict( segmentation_dict: dict ) -> list[dict]:
                 l['parents']=parent_region_stack
         subregion_lines = list(itertools.chain.from_iterable([ get_lines_from_region( inner_reg, [inner_reg['id']] + parent_region_stack ) for inner_reg in reg['regions']])) if 'regions' in reg else []
         return (reg['lines'] if 'lines' in reg else []) + subregion_lines
+    if by_reference:
+        return get_lines_from_region( segmentation_dict, [] )
     return get_lines_from_region( copy.deepcopy(segmentation_dict), [] )
+
 
 
 def region_dicts_from_segmentation_dict( segmentation_dict: dict ) -> list[dict]:
