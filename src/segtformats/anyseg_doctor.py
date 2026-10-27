@@ -83,7 +83,7 @@ def main():
             if not re.search( r'{}$'.format( input_suffix ), Path( file_path ).name):
                 logger.warning(f"Input file path '{Path(file_path).name}' does not match input suffix '{input_suffix}': output aborted.")
                 continue
-            out_path = re.sub(r'{}'.input_suffix, output_suffix, file_path )
+            out_path = re.sub(r'{}'.format(input_suffix), output_suffix, file_path )
         logger.debug(f"Output file = {out_path}")
 
         if not args.overwrite_existing and Path(out_path).exists():
