@@ -34,7 +34,7 @@ from .segtformat_documents import JsonSchema, XslAltoPage, PageXmlSchema
 
 SegFormat = Enum('SegFormat', [('Unknown',0),('PAGE',1), ('ALTO',2), ('JSON',3)])
 
-def get_format( segfile: str )->int:
+def get_format( segfile: str, strict=True )->int:
     """
     Detect and return segmentation metadata format:
     + Page
@@ -43,6 +43,8 @@ def get_format( segfile: str )->int:
 
     Args:
         segfile (str): segmentation file.
+        strict (bool): if true, check basic structure, ensuring 'regions' is a top-level key;
+            otherwise, accept a looser format.
     Returns:
         Segformat: format code.
     """
@@ -68,7 +70,7 @@ def get_format( segfile: str )->int:
             try:
                 segdict = json.load( segfile_if )
                 # coarse check
-                if 'image_filename' in segdict and 'regions' in segdict:
+                if 'image_filename' in segdict and (not strict or 'regions' in segdict):
                     return SegFormat.JSON
                 return SegFormat.Unknown
             except ValueError:
