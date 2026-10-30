@@ -34,7 +34,7 @@ def main():
         'output_suffix': '.json', 
         'overwrite_existing': (False, "Overwrite an existing output file."),
         'drop_transcription': (False, "Remove line transcription, if it exists."),
-        'repair': (False, "Repair a faulty dictionary: re-assign lines to their proper regions; expand regions to include every pixel of the line polygon."),
+        'repair': (True, "Repair a faulty dictionary: re-assign lines to their proper regions; expand regions to include every pixel of the line polygon."),
         'diagnose': (False, "Run a diagnosis, scanning for potential issues."),
         #'delete_line_features': FargvPositional(default=[], description="Line items to be removed (use with caution!)"),
         'verbosity': FargvChoice(['2','0','1','3'], description="Verbosity levels: 0 (quiet), 1 (WARNING), 2 (INFO-default), 3 (DEBUG)"),
@@ -84,7 +84,7 @@ def main():
             # insert metadata at the top
             regions = segdict['regions']
             del segdict['regions']
-            segdict['metadata'].update( {'created': str(datetime.now()), 'creator': __file__ })
+            segdict['metadata'].update( {'created': str(datetime.now().isoformat('T','seconds')), 'creator': __file__ })
 
             if args.comment:
                 segdict['metadata']['comments']=args.comment
@@ -109,6 +109,7 @@ def main():
             logger.info("File {} exists: skipping.".format( out_path ))
             continue
         with open(out_path, 'w') as json_outf:
+            logger.info(f"W: {Path(file_path).name} → {Path(out_path).name}")
             json_outf.write( segdict_str )
     return 0
 
