@@ -43,6 +43,7 @@ from pathlib import Path
 
 
 import fargv
+fargv.util.verbosity=1 # for --help to display option descriptions
 from fargv import FargvChoice, FargvVariadic
 
 from . import segtformats as sgf

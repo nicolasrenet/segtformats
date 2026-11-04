@@ -11,6 +11,7 @@ from pathlib import Path
 from datetime import datetime
 
 import fargv
+fargv.util.verbosity=1 # for --help to display option descriptions
 from fargv import FargvChoice, FargvPositional
 
 from . import segtformats as sgf

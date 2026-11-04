@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 import fargv
+fargv.util.verbosity=1 # for --help to display option descriptions
 from fargv import FargvPositional, FargvChoice
 from jsonschema import validate
 
