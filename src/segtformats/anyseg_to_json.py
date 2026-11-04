@@ -80,6 +80,6 @@ def main():
             continue
         with open(out_path, 'w') as json_outf:
             json_outf.write( segdict_str )
-            logger.info( status_string + f"W → {json_path}")
+            logger.info( status_string + f"W → {out_path}")
 
     return 0
