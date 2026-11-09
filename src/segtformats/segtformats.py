@@ -819,7 +819,7 @@ def anyseg_to_ascii( segfile: str, scale_hw=(.01,.02), lines=0, repair=False, te
         segdict = json_doctor( segdict )
     return segdict_to_ascii( segdict, scale_hw=scale_hw, lines=lines, text=text)
 
-def anyseg_to_dict( segfile: str )->dict:
+def anyseg_to_dict( segfile: str )->tuple[dict,int]:
     """
     Parse any segmentation file into a Python dictionary.
 
@@ -833,7 +833,7 @@ def anyseg_to_dict( segfile: str )->dict:
     segmentation_format = get_format( segfile )
     if segmentation_format == SegFormat.Unknown:
         logging.info(f"{Path(__file__).name}.anyseg_to_ascii: Could not determine input format. Abort.")
-        return ''
+        return ({}, SegFormat.Unknown)
     if segmentation_format == SegFormat.JSON:
         with open(segfile) as seg_if:
             segdict = json.load( seg_if )
