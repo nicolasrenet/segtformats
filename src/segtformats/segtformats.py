@@ -102,7 +102,7 @@ def page_xml_from_segmentation_dict(seg_dict: str, output_file: str='', with_tex
     creatorElt = ET.SubElement( metadataElt, 'Creator')
     creatorElt.text=seg_dict['metadata']['creator'] if ('metadata' in seg_dict and 'creator' in seg_dict['metadata']) else 'Universität Graz/DH/nicolas.renet@uni-graz.at'
     createdElt = ET.SubElement( metadataElt, 'Created')
-    createdElt.text=datetime.now().isoformat("T", "seconds")
+    createdElt.text=datetime.now().isoformat('T', 'seconds')
     lastChangeElt = ET.SubElement( metadataElt, 'LastChange')
     lastChangeElt.text=createdElt.text
     commentElt = ET.SubElement( metadataElt, 'Comments')
@@ -478,7 +478,7 @@ def alto_to_page_xml_string( segfile: str, xslfile=None)->str:
 
     # XSL transform
     transform = LET.XSLT( LET.parse( xslfile )) if xslfile and Path(xslfile).exists() else LET.XSLT( LET.XML( XslAltoPage.encode() ))
-    newdom = transform(dom, today=LET.XSLT.strparam(datetime.now().isoformat("T","seconds")), source=LET.XSLT.strparam(Path(source_file).name))
+    newdom = transform(dom, today=LET.XSLT.strparam(datetime.now().isoformat('T','seconds')), source=LET.XSLT.strparam(Path(source_file).name))
 
     LET.indent( newdom, space='\t', level=0)
     return LET.tostring( newdom ).decode()

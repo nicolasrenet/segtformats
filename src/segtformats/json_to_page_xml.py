@@ -45,7 +45,7 @@ def main():
         with open( file_path, 'r') as json_if:
             logger.warning( file_path )
             segdict = json.load( json_if )
-            segdict['metadata'].update( {'created': str(datetime.now()), 'creator': __file__ })
+            segdict['metadata'].update( {'created': str(datetime.now().isoformat('T','seconds')), 'creator': __file__ })
             if args.comment:
                 segdict['metadata']['comments']=args.comment
 
