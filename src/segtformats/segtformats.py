@@ -324,9 +324,9 @@ def segmentation_dict_from_page_xml(page_source: str, get_text=True, regions_as_
         page_root, ns = None, {}
         with open( f, 'r' ) as page_file:
             for line in page_file:
-                m = re.search(r'xmlns="([^"]+)"', line)
+                m = re.search(r'xmlns(:[^:]+)?="([^"]+)"', line)
                 if m:
-                    ns['pc'] = m.group(1)
+                    ns['pc'] = m.group(2)
                     page_file.seek(0)
                     break
             page_root = ET.parse( page_file ).getroot()
