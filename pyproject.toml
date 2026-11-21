@@ -1,6 +1,6 @@
 [project]
 name = "segtformats"
-version = "0.2"
+version = "0.3"
 authors = [
   { name="Nicolas Renet", email="nprenet@gmail.com" },
 ]
@@ -10,7 +10,7 @@ requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: MacOS",
-    "Operating System :: Posix :: Linux",
+    "Operating System :: POSIX :: Linux"
 ]
 
 license="MIT"
@@ -23,6 +23,7 @@ dependencies = [
 	"jsonschema",
 	"lxml",
 	"fargv",
+        "unidecode"
 ]
 
 [project.urls]
