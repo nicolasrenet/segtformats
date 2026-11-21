@@ -36,7 +36,7 @@ From GitHub:
 From PyPi: 
  
   ```bash
-  TBA
+  pip install segtformats 
   ```
 
 
